@@ -1,7 +1,9 @@
 <script setup>
 import { useRouter } from 'vue-router';
 import Button from 'primevue/button';
+import { useI18n } from 'vue-i18n';
 
+const { locale } = useI18n();
 // Sử dụng Vue Router để chuyển trang khi bấm nút
 const router = useRouter();
 
@@ -17,10 +19,10 @@ const goToHarvester = () => {
         <i class="pi pi-database"></i>
       </div>
       
-      <h1 class="main-title">AI Dataset <span class="highlight">Harvester</span></h1>
+      <h1 class="main-title">{{ $t('app.title') }}<span class="highlight"> Harvester</span></h1>
       
       <p class="subtitle">
-        Cỗ máy thu hoạch và kiến tạo dữ liệu tự động. Xây dựng các tập dữ liệu huấn luyện (Training Dataset) chất lượng cao cho LLMs, Text-to-SQL, và AI Models với tốc độ ánh sáng.
+        {{ $t('app.home_subtitle') }}
       </p>
 
       <div class="features">
@@ -30,7 +32,7 @@ const goToHarvester = () => {
       </div>
 
       <Button 
-        label="KHỞI ĐỘNG HỆ THỐNG" 
+        :label="$t('app.start_btn')" 
         icon="pi pi-power-off" 
         size="large" 
         class="cta-button"

@@ -1,4 +1,5 @@
 import { createApp } from 'vue';
+import { createI18n } from 'vue-i18n';
 import App from './App.vue';
 import './style.css';
 import router from './router';
@@ -6,6 +7,15 @@ import PrimeVue from 'primevue/config';
 import Aura from '@primevue/themes/aura';
 import { definePreset } from '@primevue/themes';
 import 'primeicons/primeicons.css';
+import vi from './locales/vi.json';
+import en from './locales/en.json';
+
+const i18n = createI18n({
+  legacy: false, // Dùng Composition API của Vue 3
+  locale: 'vi',  // Ngôn ngữ mặc định
+  fallbackLocale: 'en',
+  messages: { vi, en }
+});
 
 const AIPreset = definePreset(Aura, {
     semantic: {
@@ -27,6 +37,7 @@ const AIPreset = definePreset(Aura, {
 
 const app = createApp(App);
 app.use(router);
+app.use(i18n);
 app.use(PrimeVue,{
     theme:{
         preset: AIPreset,

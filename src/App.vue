@@ -1,7 +1,13 @@
 <script setup>
 import { ref, onMounted, watch } from 'vue';
 import SelectButton from 'primevue/selectbutton';
+import { useI18n } from 'vue-i18n';
 
+const { locale } = useI18n();
+const langOptions = [
+  { label: 'VN', value: 'vi' },
+  { label: 'EN', value: 'en' }
+];
 // --- STATE: THEME (Sáng / Tối / Auto) ---
 const themeMode = ref('auto');
 const themeOptions = [
@@ -57,7 +63,8 @@ onMounted(() => {
 
 <template>
   <div class="app-layout">
-    <div class="theme-toggle">
+    <div class="top-controls">
+      <SelectButton v-model="locale" :options="langOptions" optionLabel="label" optionValue="value" :allowEmpty="false" class="lang-selector" />
       <SelectButton v-model="themeMode" :options="themeOptions" optionValue="value" :allowEmpty="false">
         <template #option="slotProps">
           <i :class="slotProps.option.icon" :title="slotProps.option.tooltip"></i>
@@ -78,12 +85,15 @@ onMounted(() => {
 }
 
 /* Nút chọn theme ở góc phải */
-.theme-toggle {
+.top-controls {
   position: absolute;
   top: 1.5rem;
   right: 1.5rem;
   z-index: 100;
+  display: flex;
+  gap: 0.5rem;
 }
+:deep(.lang-selector .p-togglebutton) { padding: 0.5rem; font-size: 0.85rem; font-weight: bold; }
 .main-content {
   padding: 4rem 1rem 2rem 1rem;
 }

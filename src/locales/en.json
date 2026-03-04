@@ -1,0 +1,18 @@
+{
+  "app": {
+    "title": "AI Dataset",
+    "home_subtitle": "Automated data harvesting and generation engine. Build high-quality training datasets for LLMs, Text-to-SQL, and AI Models at the speed of light.",
+    "start_btn": "BOOT SYSTEM",
+    "home_back": "Home"
+  },
+  "harvester": {
+    "step1_label": "1. System Prompt & Role:",
+    "step1_placeholder": "Ex: You are a SQL expert...",
+    "step2_label": "2. Seed Data (One per line):",
+    "step2_placeholder": "Ex: Hospital\nSchool",
+    "step3_label": "3. Output Schema (JSON Keys):",
+    "step3_hint": "*The system will always force AI to generate JSON matching this schema.*",
+    "step4_label": "4. Samples per Seed:",
+    "run_btn": "START HARVESTING"
+  }
+}

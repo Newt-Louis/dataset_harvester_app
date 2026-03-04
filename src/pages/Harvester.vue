@@ -169,4 +169,15 @@ const startHarvesting = async () => {
 
 .action-bar { margin-top: 2rem; }
 .run-btn { font-weight: bold; letter-spacing: 1px; }
+@media (max-width: 768px) {
+  .schema-header {
+    flex-direction: column; /* Đẩy cục chọn định dạng xuống dòng mới */
+    align-items: flex-start;
+    gap: 0.5rem;
+  }
+  
+  .slider-container {
+    flex-wrap: wrap; /* Nếu thanh trượt bị kẹt, cho phép nó rớt dòng */
+  }
+}
 </style>
