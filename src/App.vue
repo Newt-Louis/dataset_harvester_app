@@ -86,8 +86,5 @@ onMounted(() => {
 }
 .main-content {
   padding: 4rem 1rem 2rem 1rem;
-  display: flex;
-  justify-content: center;
-  align-items: flex-start;
 }
 </style>

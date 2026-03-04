@@ -1,5 +1,6 @@
 <script setup>
 import { ref } from 'vue';
+import { useRouter } from 'vue-router';
 import Card from 'primevue/card';
 import Textarea from 'primevue/textarea';
 import Slider from 'primevue/slider';
@@ -7,6 +8,7 @@ import InputNumber from 'primevue/inputnumber';
 import Button from 'primevue/button';
 import SelectButton from 'primevue/selectbutton';
 
+const router = useRouter();
 // --- STATE: DỮ LIỆU FORM ---
 const promptStage = ref('');
 const seeds = ref('');
@@ -41,6 +43,10 @@ const startHarvesting = async () => {
 </script>
 
 <template>
+    <div class="harvester-page-wrapper">
+        <div class="back-nav">
+        <Button icon="pi pi-arrow-left" label="Trang chủ" text @click="router.push('/')" />
+    </div>
     <Card class="harvester-card">
       <template #title>
         <div class="header-title">
@@ -89,10 +95,18 @@ const startHarvesting = async () => {
         </div>
       </template>
     </Card>
+    </div>
 </template>
 
 <style scoped>
-
+.harvester-page-wrapper {
+  width: 100%;
+  max-width: 800px;
+  margin: 0 auto; /* Tự động căn giữa màn hình */
+}
+.back-nav {
+  margin-bottom: 1rem;
+}
 .harvester-card {
   width: 100%;
   max-width: 800px;

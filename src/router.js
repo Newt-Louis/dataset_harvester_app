@@ -1,10 +1,9 @@
 import { createRouter, createWebHistory } from 'vue-router';
-import Harvester from './pages/Harvester.vue'; // Trang ta sắp tạo
-import App from './App.vue';
+import Harvester from './pages/Harvester.vue';
+import Home from './pages/Home.vue';
 
 const routes = [
-  // Truy cập trang chủ ('/') sẽ tự động chuyển hướng sang '/harvester'
-  { path: '/', component: App },
+  { path: '/', component: Home },
   { path: '/harvesting', component: Harvester }
 ];
 
