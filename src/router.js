@@ -5,7 +5,7 @@ import App from './App.vue';
 const routes = [
   // Truy cập trang chủ ('/') sẽ tự động chuyển hướng sang '/harvester'
   { path: '/', component: App },
-  { path: '/harvester', component: Harvester }
+  { path: '/harvesting', component: Harvester }
 ];
 
 const router = createRouter({
