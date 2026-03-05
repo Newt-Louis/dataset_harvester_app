@@ -7,6 +7,7 @@ import Slider from 'primevue/slider';
 import InputNumber from 'primevue/inputnumber';
 import Button from 'primevue/button';
 import SelectButton from 'primevue/selectbutton';
+import axios from 'axios';
 
 const router = useRouter();
 // --- STATE: DỮ LIỆU FORM ---
@@ -36,9 +37,11 @@ const startHarvesting = async () => {
     format: outputFormat.value,
     samples: numSamples.value 
   };
-  
-  console.log("Đang gửi Payload siêu xịn:", payload);
-  setTimeout(() => { isGenerating.value = false; }, 2000);
+  console.log(payload);
+  const response = await axios.post('/api/generate',payload);
+  if (response.status === 200) {
+    console.log(response.data);
+  }
 };
 </script>
 

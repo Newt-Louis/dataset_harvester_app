@@ -1,3 +1,4 @@
+import axios from 'axios';
 import { createApp } from 'vue';
 import { createI18n } from 'vue-i18n';
 import App from './App.vue';
@@ -10,9 +11,12 @@ import 'primeicons/primeicons.css';
 import vi from './locales/vi.json';
 import en from './locales/en.json';
 
+axios.defaults.baseURL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000';
+axios.defaults.timeout = 60000;
+
 const i18n = createI18n({
-  legacy: false, // Dùng Composition API của Vue 3
-  locale: 'vi',  // Ngôn ngữ mặc định
+  legacy: false,
+  locale: 'vi',
   fallbackLocale: 'en',
   messages: { vi, en }
 });
