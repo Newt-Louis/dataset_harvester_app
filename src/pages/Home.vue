@@ -2,6 +2,8 @@
 import { useRouter } from 'vue-router';
 import Button from 'primevue/button';
 import { useI18n } from 'vue-i18n';
+import axios from 'axios';
+import { onMounted } from 'vue';
 
 const { locale } = useI18n();
 // Sử dụng Vue Router để chuyển trang khi bấm nút
@@ -10,6 +12,17 @@ const router = useRouter();
 const goToHarvester = () => {
   router.push('/harvesting');
 };
+
+const getHomeData = async ()=>{
+  const response = await axios.get('/');
+  if (response.status === 200) {
+    console.log(response.data)
+  }
+}
+
+onMounted(()=>{
+  getHomeData();
+});
 </script>
 
 <template>
