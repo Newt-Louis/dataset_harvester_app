@@ -45,7 +45,7 @@ const startHarvesting = async () => {
 <template>
     <div class="harvester-page-wrapper">
         <div class="back-nav">
-        <Button icon="pi pi-arrow-left" label="Trang chủ" text @click="router.push('/')" />
+        <Button icon="pi pi-arrow-left" :label="$t('app.home_back')" text @click="router.push('/')" />
     </div>
     <Card class="harvester-card">
       <template #title>
@@ -57,26 +57,26 @@ const startHarvesting = async () => {
 
       <template #content>
         <div class="field">
-          <label for="prompt">1. Yêu cầu Hệ thống & Vai trò (System Prompt):</label>
-          <Textarea id="prompt" v-model="promptStage" rows="4" placeholder="VD: Bạn là chuyên gia SQL..." class="w-full" />
+          <label for="prompt">{{ $t('harvester.step1_label') }}</label>
+          <Textarea id="prompt" v-model="promptStage" rows="4" :placeholder="$t('harvester.step1_placeholder')" class="w-full" />
         </div>
 
         <div class="field">
-          <label for="seeds">2. Tập Hạt giống (Seeds - Mỗi giá trị 1 dòng):</label>
-          <Textarea id="seeds" v-model="seeds" rows="3" placeholder="VD: Bệnh viện&#10;Trường học" class="w-full" />
+          <label for="seeds">{{ $t('harvester.step2_label') }}</label>
+          <Textarea id="seeds" v-model="seeds" rows="3" :placeholder="$t('harvester.step2_placeholder')" class="w-full" />
         </div>
 
         <div class="field schema-section">
           <div class="schema-header">
-            <label for="schema">3. Cấu trúc đầu ra (JSON Keys):</label>
+            <label for="schema">{{ $t('harvester.step3_label') }}</label>
             <SelectButton v-model="outputFormat" :options="formatOptions" optionLabel="label" optionValue="value" :allowEmpty="false" class="format-selector" />
           </div>
           <Textarea id="schema" v-model="outputSchema" rows="5" class="w-full code-font" />
-          <small class="hint-text">*Hệ thống sẽ luôn ép AI sinh JSON theo cấu trúc này. Nếu bạn chọn CSV, hệ thống tự động lấy các Keys làm tiêu đề cột.*</small>
+          <small class="hint-text">{{ $t('harvester.step3_hint') }}</small>
         </div>
 
         <div class="field slider-field">
-          <label>4. Số lượng mẫu (Samples) / Hạt giống:</label>
+          <label>{{ $t('harvester.step4_label') }}</label>
           <div class="slider-container">
             <Slider v-model="numSamples" :min="1" :max="100" class="flex-grow" />
             <InputNumber v-model="numSamples" :min="1" :max="100" inputClass="fixed-width-input" />
@@ -85,7 +85,7 @@ const startHarvesting = async () => {
 
         <div class="action-bar">
           <Button 
-            label="BẮT ĐẦU THU HOẠCH" 
+            :label="$t('harvester.run_btn')" 
             icon="pi pi-bolt" 
             size="large"
             :loading="isGenerating"

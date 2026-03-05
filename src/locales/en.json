@@ -11,7 +11,7 @@
     "step2_label": "2. Seed Data (One per line):",
     "step2_placeholder": "Ex: Hospital\nSchool",
     "step3_label": "3. Output Schema (JSON Keys):",
-    "step3_hint": "*The system will always force AI to generate JSON matching this schema.*",
+    "step3_hint": "*The system will always force AI to generate JSON matching this schema. If you select CSV, the system automatically uses the keys as column headers.*",
     "step4_label": "4. Samples per Seed:",
     "run_btn": "START HARVESTING"
   }
