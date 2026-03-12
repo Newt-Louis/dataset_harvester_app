@@ -30,12 +30,12 @@ const startHarvesting = async () => {
   isGenerating.value = true;
   const seedArray = seeds.value.split('\n').filter(s => s.trim() !== '');
   
-  const payload = { 
-    prompt: promptStage.value, 
-    seeds: seedArray, 
+  const payload = {
+    prompt: promptStage.value,
+    seeds: seedArray,
     schema: outputSchema.value,
     format: outputFormat.value,
-    samples: numSamples.value 
+    samples: numSamples.value
   };
   console.log(payload);
   const response = await axios.post('/api/generate',payload);
