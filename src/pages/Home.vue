@@ -51,6 +51,14 @@ onMounted(()=>{
         class="cta-button"
         @click="goToHarvester" 
       />
+      <Button 
+          :label="$t('app.api_setting')" 
+          icon="pi pi-cog" 
+          size="large" 
+          severity="secondary"
+          class="cta-button"
+          @click="router.push('/settings')" 
+        />
     </div>
   </div>
 </template>

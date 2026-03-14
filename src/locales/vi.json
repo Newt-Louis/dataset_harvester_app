@@ -3,7 +3,8 @@
     "title": "AI Dataset",
     "home_subtitle": "Cỗ máy thu hoạch và kiến tạo dữ liệu tự động. Xây dựng các tập dữ liệu huấn luyện (Training Dataset) chất lượng cao cho LLMs, Text-to-SQL, và AI Models với tốc độ ánh sáng.",
     "start_btn": "KHỞI ĐỘNG HỆ THỐNG",
-    "home_back": "Trang chủ"
+    "home_back": "Trang chủ",
+    "api_setting":"Cấu hình API"
   },
   "harvester": {
     "step1_label": "1. Yêu cầu Hệ thống & Vai trò (System Prompt):",
