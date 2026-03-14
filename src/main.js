@@ -7,6 +7,7 @@ import router from './router';
 import PrimeVue from 'primevue/config';
 import Aura from '@primevue/themes/aura';
 import { definePreset } from '@primevue/themes';
+import Tooltip from 'primevue/tooltip';
 import 'primeicons/primeicons.css';
 import vi from './locales/vi.json';
 import en from './locales/en.json';
@@ -50,5 +51,5 @@ app.use(PrimeVue,{
         }
     }
 });
-
+app.directive('tooltip', Tooltip);
 app.mount('#root');

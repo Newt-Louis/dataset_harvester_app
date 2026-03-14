@@ -65,7 +65,7 @@ onMounted(() => {
   <div class="app-layout">
     <div class="top-controls">
       <SelectButton v-model="locale" :options="langOptions" optionLabel="label" optionValue="value" :allowEmpty="false" class="lang-selector" />
-      <SelectButton v-model="themeMode" :options="themeOptions" optionValue="value" :allowEmpty="false">
+      <SelectButton v-model="themeMode" :options="themeOptions" optionLabel="value" optionValue="value" :allowEmpty="false">
         <template #option="slotProps">
           <i :class="slotProps.option.icon" :title="slotProps.option.tooltip"></i>
         </template>
