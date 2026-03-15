@@ -12,7 +12,7 @@ const router = useRouter();
 const authStore = useAuthStore();
 const jobs = ref([]);
 let pollingInterval = null;
-console.log(authStore.user);
+
 // Hàm gọi API lấy dữ liệu
 const fetchJobs = async () => {
   try {
