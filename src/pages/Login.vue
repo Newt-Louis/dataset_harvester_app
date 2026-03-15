@@ -8,13 +8,13 @@ import Password from 'primevue/password'
 import Button from 'primevue/button'
 import Message from 'primevue/message'
 
-const auth   = useAuthStore()
+const auth = useAuthStore()
 const router = useRouter()
 
-const email    = ref('')
+const email = ref('')
 const password = ref('')
-const error    = ref('')
-const loading  = ref(false)
+const error = ref('')
+const loading = ref(false)
 
 const handleLogin = async () => {
   error.value   = ''

@@ -6,7 +6,7 @@ import Cookies from 'js-cookie';
 
 export const useAuthStore = defineStore('auth', () => {
   const token = ref(Cookies.get('auth_token') || null)
-  const user  = ref(null)
+  const user = ref(null)
   const isProduction = import.meta.env.PROD;
   const isLoggedIn = computed(() => !!token.value)
 
@@ -18,7 +18,7 @@ export const useAuthStore = defineStore('auth', () => {
 
   function clearToken() {
     token.value = null
-    user.value  = null
+    user.value = null
     Cookies.remove('auth_token')
   }
 
@@ -29,7 +29,7 @@ export const useAuthStore = defineStore('auth', () => {
   }
 
   async function login(email, password) {
-    const data = await api.post('/auth/login', { email, password })
+    const data = await api.post('/auth/login', { login_field: email, password })
     setToken(data.access_token)
     router.push('/')
   }
