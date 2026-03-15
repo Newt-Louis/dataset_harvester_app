@@ -1,5 +1,5 @@
 <script setup>
-import { ref, computed } from 'vue';
+import { ref, computed, onMounted } from 'vue';
 import { useRouter } from 'vue-router';
 import Card from 'primevue/card';
 import Textarea from 'primevue/textarea';
@@ -8,6 +8,7 @@ import InputNumber from 'primevue/inputnumber';
 import Button from 'primevue/button';
 import SelectButton from 'primevue/selectbutton';
 import Message from 'primevue/message';
+import Dialog from 'primevue/dialog';
 import { useAuthStore } from '@/stores/auth';
 import { useToast } from 'primevue/usetoast';
 import { api } from '@/api/client';
@@ -15,7 +16,57 @@ import { api } from '@/api/client';
 const router = useRouter();
 const authStore = useAuthStore();
 const toast = useToast();
+const showBulkImport = ref(false);
+const bulkJsonText = ref('[\n  {\n    "context": "",\n    "rule": "80% truy vấn cơ bản, 20% IQ..."\n  }\n]');
+const applyBulkImport = () => {
+  try {
+    const parsed = JSON.parse(bulkJsonText.value);
+    if (Array.isArray(parsed)) {
+      // Ép kiểu cho chắc chắn
+      seeds.value = parsed.map(item => ({
+        context: item.context || '',
+        rule: item.rule || ''
+      }));
+      showBulkImport.value = false;
+      toast.add({ severity: 'success', summary: 'Thành công', detail: `Đã nạp ${parsed.length} hạt giống!`, life: 3000 });
+    } else {
+      throw new Error("Dữ liệu không phải là Mảng (Array)");
+    }
+  } catch (error) {
+    toast.add({ severity: 'error', summary: 'Lỗi Format', detail: 'Chuỗi JSON không hợp lệ. Vui lòng kiểm tra lại!', life: 4000 });
+  }
+};
+// ==========================================
+// HOOK: TỰ ĐỘNG PHỤC HỒI STATE KHI VÀO TRANG
+// ==========================================
+onMounted(async () => {
+  if (authStore.isLoggedIn) {
+    try {
+      const state = await api.get('/api/harvesting');
+      if (state && Object.keys(state).length > 0) {
+        
+        // Phục hồi Khối Tĩnh (từ cột prompt JSON)
+        if (state.prompt) {
+          const parsedPrompt = JSON.parse(state.prompt);
+          rolePrompt.value = parsedPrompt.role_prompt || rolePrompt.value;
+          constraintsPrompt.value = parsedPrompt.constraints_prompt || constraintsPrompt.value;
+        }
 
+        // Phục hồi Hạt giống (từ cột seeds JSON)
+        if (state.seeds) {
+          seeds.value = JSON.parse(state.seeds);
+        }
+
+        // Phục hồi Format, Schema, Samples
+        outputFormat.value = state.output_format || 'jsonl';
+        outputSchema.value = state.output_schema || outputSchema.value;
+        numSamples.value = state.samples || 10;
+      }
+    } catch (error) {
+      console.log("Chưa có State cũ hoặc lỗi tải State.");
+    }
+  }
+});
 // ==========================================
 // STATE: KHỐI TĨNH (STATIC PROMPTS)
 // ==========================================
@@ -103,7 +154,7 @@ const startHarvesting = async () => {
   };
 
   try {
-    const response = await api.post('/api/generate', payload);
+    const response = await api.post('/api/harvesting/generate', payload);
     // Nếu BE trả về 200 (Thành công đưa vào hàng đợi)
     toast.add({ severity: 'success', summary: 'Thành công', detail: response.message || 'Đã đưa vào hàng đợi chạy nền!', life: 5000 });
     
@@ -159,7 +210,10 @@ const startHarvesting = async () => {
         <div class="section-block seed-container">
           <div class="seed-header-wrap">
             <h3 class="section-title"><i class="pi pi-sitemap"></i> Danh sách Hạt giống (Seeds)</h3>
-            <Button label="Thêm Hạt giống" icon="pi pi-plus" size="small" outlined @click="addSeed" :disabled="isGenerating" />
+            <div class="">
+              <Button label="Dán nhanh (JSON)" icon="pi pi-code" severity="help" size="small" outlined @click="showBulkImport = true" :disabled="isGenerating" style="margin-right: 12px;"/>
+              <Button label="Thêm Hạt giống" icon="pi pi-plus" size="small" outlined @click="addSeed" :disabled="isGenerating" />
+            </div>
           </div>
           <p class="hint-text">Mỗi hạt giống tương ứng với 1 lượt gọi API. Hãy chia nhỏ bối cảnh để AI tạo ra dữ liệu đa dạng nhất.</p>
 
@@ -228,6 +282,16 @@ const startHarvesting = async () => {
       </template>
     </Card>
   </div>
+  <Dialog v-model:visible="showBulkImport" modal header="Nhập nhanh Hạt giống từ JSON" :style="{ width: '40rem' }">
+    <p class="text-secondary mb-3">
+      Hãy nhờ ChatGPT/Claude sinh ra hàng chục kịch bản theo định dạng Mảng JSON bên dưới, sau đó dán vào đây để nạp nhanh.
+    </p>
+    <Textarea v-model="bulkJsonText" rows="12" class="w-full code-font" />
+    <template #footer>
+      <Button label="Hủy" icon="pi pi-times" text @click="showBulkImport = false" />
+      <Button label="Áp dụng ngay" icon="pi pi-check" @click="applyBulkImport" />
+    </template>
+  </Dialog>
 </template>
 
 <style scoped>
@@ -312,6 +376,7 @@ const startHarvesting = async () => {
   display: flex;
   justify-content: space-between;
   align-items: center;
+  margin-bottom: 24px;
 }
 
 .seed-item {
