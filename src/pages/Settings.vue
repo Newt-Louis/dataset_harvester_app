@@ -12,7 +12,7 @@ import Tag from 'primevue/tag';
 import { useToast } from 'primevue/usetoast'
 import { useAuthStore } from '@/stores/auth';
 import { useI18n } from 'vue-i18n';
-import { api } from '@/api';
+import { api } from '@/api/client';
 
 const { t } = useI18n()
 const router = useRouter();

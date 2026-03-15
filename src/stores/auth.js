@@ -1,24 +1,25 @@
-import { defineStore } from 'pinia'
-import { ref, computed } from 'vue'
-import { api } from '@/api'
-import router from '@/router'
+import { defineStore } from 'pinia';
+import { ref, computed } from 'vue';
+import { api } from '@/api/client';
+import router from '@/router';
+import Cookies from 'js-cookie';
 
 export const useAuthStore = defineStore('auth', () => {
-  const token = ref(localStorage.getItem('auth_token') || null)
+  const token = ref(Cookies.get('auth_token') || null)
   const user  = ref(null)
-
+  const isProduction = import.meta.env.PROD;
   const isLoggedIn = computed(() => !!token.value)
 
-  // Lưu token vào state + localStorage
+  // Lưu token vào state + Cookie (Set thời hạn 7 ngày)
   function setToken(newToken) {
     token.value = newToken
-    localStorage.setItem('auth_token', newToken)
+    Cookies.set('auth_token', newToken, { expires: 7, secure: isProduction, sameSite: 'Strict' })
   }
 
   function clearToken() {
     token.value = null
     user.value  = null
-    localStorage.removeItem('auth_token')
+    Cookies.remove('auth_token')
   }
 
   async function register(email, password) {
