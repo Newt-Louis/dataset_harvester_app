@@ -1,10 +1,12 @@
 import { createRouter, createWebHistory } from 'vue-router';
 import { useAuthStore } from './stores/auth';
+import Cookies from 'js-cookie';
 import Harvester from './pages/Harvester.vue';
 import Home from './pages/Home.vue';
 import Settings from './pages/Settings.vue';
 import Login from './pages/Login.vue';
 import Register from './pages/Register.vue';
+import Dashboard from './pages/Dashboard.vue';
 
 const routes = [
   { path: '/', component: Home },
@@ -20,20 +22,17 @@ const router = createRouter({
   routes,
 });
 
-router.beforeEach(async (to, from, next) => {
-  import('js-cookie').then(Cookies => {
-    const hasToken = !!Cookies.default.get('auth_token');
+router.beforeEach((to, from) => {
+    const hasToken = !!Cookies.get('auth_token');
 
     if (to.meta.requiresAuth && !hasToken) {
-        next('/login');
-      } else if (to.meta.requiresGuest && hasToken) {
-        next('/dashboard');
-      } else if (to.path === '/' && hasToken) {
-        next('/dashboard');
-      } else {
-        next();
-      }
-  });
+      return '/login';
+    } else if (to.meta.requiresGuest && hasToken) {
+      return '/dashboard';
+    } else if (to.path === '/' && hasToken) {
+      return '/dashboard';
+    }
+    return true;
 })
 
 export default router;

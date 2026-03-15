@@ -12,7 +12,7 @@ const router = useRouter();
 const authStore = useAuthStore();
 const jobs = ref([]);
 let pollingInterval = null;
-
+console.log(authStore.user);
 // Hàm gọi API lấy dữ liệu
 const fetchJobs = async () => {
   try {
@@ -66,10 +66,15 @@ const calculateProgress = (job) => {
   <div class="dashboard-wrapper">
     <div class="dash-header">
       <div>
-        <h1 style="margin: 0; color: var(--p-primary-color);"><i class="pi pi-objects-column"></i> Trạm Điều Khiển</h1>
-        <p style="margin-top: 5px; color: var(--p-text-color-secondary);">Xin chào, {{ authStore.user?.email || 'Kỹ sư' }}!</p>
+        <div class="header-title">
+          <i class="pi pi-objects-column" style="font-size: 1.8rem; color: var(--p-primary-color);"></i>
+          <h2 style="margin: 0; color: var(--p-primary-color);">Trạm Điều Khiển</h2>
+        </div>
+        <p class="welcome-text">
+          Xin chào, <strong>{{ authStore.user?.username || authStore.user?.email || 'Kỹ sư' }}</strong>!
+        </p>
       </div>
-      <Button label="Thu hoạch mới" icon="pi pi-plus" @click="router.push('/harvester')" />
+      <Button label="Thu hoạch mới" icon="pi pi-plus" @click="router.push('/harvesting')" />
     </div>
 
     <Card v-if="jobs.length === 0" class="empty-card">
@@ -78,7 +83,7 @@ const calculateProgress = (job) => {
           <i class="pi pi-inbox" style="font-size: 3rem; color: var(--p-surface-400);"></i>
           <h3>Chưa có dữ liệu nào đang được thu hoạch</h3>
           <p class="text-secondary">Bạn chưa chạy tiến trình nào trong 24h qua. Hãy bắt đầu ngay!</p>
-          <Button label="Đến phòng Thu hoạch" severity="secondary" @click="router.push('/harvester')" />
+          <Button label="Đến phòng Thu hoạch" severity="secondary" @click="router.push('/harvesting')" />
         </div>
       </template>
     </Card>
@@ -114,6 +119,17 @@ const calculateProgress = (job) => {
 <style scoped>
 .dashboard-wrapper { width: 100%; max-width: 900px; margin: 0 auto; }
 .dash-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem; }
+.header-title {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.welcome-text {
+  margin-top: 0.5rem;
+  font-size: 1.1rem; /* Phóng to chữ */
+  color: var(--p-text-color-secondary);
+}
 .text-center { text-align: center; }
 .text-secondary { color: var(--p-text-color-secondary); margin-bottom: 1.5rem;}
 .py-5 { padding-top: 2rem; padding-bottom: 2rem; }
