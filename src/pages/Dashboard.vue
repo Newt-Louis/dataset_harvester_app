@@ -1,0 +1,133 @@
+<script setup>
+import { ref, onMounted, onUnmounted } from 'vue';
+import { useRouter } from 'vue-router';
+import Card from 'primevue/card';
+import Button from 'primevue/button';
+import ProgressBar from 'primevue/progressbar';
+import Tag from 'primevue/tag';
+import { api } from '@/api/client';
+import { useAuthStore } from '@/stores/auth';
+
+const router = useRouter();
+const authStore = useAuthStore();
+const jobs = ref([]);
+let pollingInterval = null;
+
+// Hàm gọi API lấy dữ liệu
+const fetchJobs = async () => {
+  try {
+    const response = await api.get('/');
+    if (response.is_authenticated && response.jobs) {
+      jobs.value = response.jobs;
+    }
+  } catch (error) {
+    console.error("Lỗi cập nhật Dashboard:", error);
+  }
+};
+
+// Khi vào trang: Lấy dữ liệu liền, sau đó lặp lại mỗi 3 giây
+onMounted(() => {
+  fetchJobs();
+  pollingInterval = setInterval(fetchJobs, 3000);
+});
+
+// Khi rời khỏi trang: Tắt lặp để tiết kiệm tài nguyên
+onUnmounted(() => {
+  if (pollingInterval) clearInterval(pollingInterval);
+});
+
+// Các hàm tiện ích cho Giao diện
+const getSeverity = (status) => {
+  switch (status) {
+    case 'completed': return 'success';
+    case 'running': return 'info';
+    case 'failed': return 'danger';
+    default: return 'secondary';
+  }
+};
+
+const getStatusLabel = (status) => {
+  switch (status) {
+    case 'completed': return 'Hoàn thành';
+    case 'running': return 'Đang chạy...';
+    case 'failed': return 'Thất bại';
+    default: return 'Đang chờ';
+  }
+};
+
+const calculateProgress = (job) => {
+  const total = job.total_seeds * job.target_samples_per_seed;
+  if (total === 0) return 0;
+  return Math.round((job.samples_generated / total) * 100);
+};
+</script>
+
+<template>
+  <div class="dashboard-wrapper">
+    <div class="dash-header">
+      <div>
+        <h1 style="margin: 0; color: var(--p-primary-color);"><i class="pi pi-objects-column"></i> Trạm Điều Khiển</h1>
+        <p style="margin-top: 5px; color: var(--p-text-color-secondary);">Xin chào, {{ authStore.user?.email || 'Kỹ sư' }}!</p>
+      </div>
+      <Button label="Thu hoạch mới" icon="pi pi-plus" @click="router.push('/harvester')" />
+    </div>
+
+    <Card v-if="jobs.length === 0" class="empty-card">
+      <template #content>
+        <div class="text-center py-5">
+          <i class="pi pi-inbox" style="font-size: 3rem; color: var(--p-surface-400);"></i>
+          <h3>Chưa có dữ liệu nào đang được thu hoạch</h3>
+          <p class="text-secondary">Bạn chưa chạy tiến trình nào trong 24h qua. Hãy bắt đầu ngay!</p>
+          <Button label="Đến phòng Thu hoạch" severity="secondary" @click="router.push('/harvester')" />
+        </div>
+      </template>
+    </Card>
+
+    <div v-else class="job-list">
+      <Card v-for="job in jobs" :key="job.id" class="job-card">
+        <template #content>
+          <div class="job-top">
+            <span class="job-id">Tiến trình #{{ job.id }}</span>
+            <Tag :severity="getSeverity(job.status)" :value="getStatusLabel(job.status)" />
+          </div>
+
+          <div class="job-details">
+            <p><strong>Model đang chạy:</strong> {{ job.current_model || 'Đang nạp...' }}</p>
+            <p><strong>Tiến độ:</strong> {{ job.samples_generated }} / {{ job.total_seeds * job.target_samples_per_seed }} mẫu</p>
+          </div>
+
+          <ProgressBar :value="calculateProgress(job)" :showValue="true" style="height: 12px; margin-top: 1rem;" />
+
+          <div v-if="job.status === 'completed' && job.output_file_url" class="job-actions">
+            <Button icon="pi pi-download" label="Tải Dataset" severity="success" size="small" outlined />
+          </div>
+          
+          <div v-if="job.status === 'failed'" class="error-box">
+            <i class="pi pi-exclamation-triangle"></i> Lỗi: {{ job.error_message }}
+          </div>
+        </template>
+      </Card>
+    </div>
+  </div>
+</template>
+
+<style scoped>
+.dashboard-wrapper { width: 100%; max-width: 900px; margin: 0 auto; }
+.dash-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem; }
+.text-center { text-align: center; }
+.text-secondary { color: var(--p-text-color-secondary); margin-bottom: 1.5rem;}
+.py-5 { padding-top: 2rem; padding-bottom: 2rem; }
+
+.job-list { display: flex; flex-direction: column; gap: 1rem; }
+.job-card { border: 1px solid var(--p-surface-200); box-shadow: none; transition: transform 0.2s; }
+.job-card:hover { border-color: var(--p-primary-color); }
+:global(.app-dark) .job-card { border-color: var(--p-surface-700); background: var(--p-surface-900); }
+
+.job-top { display: flex; justify-content: space-between; margin-bottom: 0.5rem; }
+.job-id { font-weight: bold; color: var(--p-text-color-secondary); font-size: 0.9rem; }
+.job-details p { margin: 0.25rem 0; font-size: 0.95rem; }
+
+.job-actions { margin-top: 1rem; display: flex; justify-content: flex-end; }
+.error-box { margin-top: 1rem; padding: 0.5rem; background: var(--p-red-50); color: var(--p-red-600); border-radius: 6px; font-size: 0.85rem; }
+:global(.app-dark) .error-box { background: rgba(255, 99, 132, 0.1); }
+</style>

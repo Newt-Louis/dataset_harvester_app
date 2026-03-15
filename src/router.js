@@ -8,9 +8,10 @@ import Register from './pages/Register.vue';
 
 const routes = [
   { path: '/', component: Home },
+  { path: '/dashboard', component: Dashboard, meta: { requiresAuth: true } },
   { path: '/harvesting', component: Harvester },
   { path: '/settings', component: Settings },
-  { path: '/login', component: Login },
+  { path: '/login', component: Login, meta: { requiresGuest: true } },
   { path:'/register', component: Register }
 ];
 
@@ -19,17 +20,20 @@ const router = createRouter({
   routes,
 });
 
-router.beforeEach(async (to) => {
-  const auth = useAuthStore()
+router.beforeEach(async (to, from, next) => {
+  import('js-cookie').then(Cookies => {
+    const hasToken = !!Cookies.default.get('auth_token');
 
-  if (to.meta.requiresAuth) {
-    const valid = await auth.checkAuth()
-    if (!valid) return { name: 'Login' }
-  }
-
-  if (to.meta.guestOnly && auth.isLoggedIn) {
-    return { name: 'Home' }
-  }
+    if (to.meta.requiresAuth && !hasToken) {
+        next('/login');
+      } else if (to.meta.requiresGuest && hasToken) {
+        next('/dashboard');
+      } else if (to.path === '/' && hasToken) {
+        next('/dashboard');
+      } else {
+        next();
+      }
+  });
 })
 
 export default router;

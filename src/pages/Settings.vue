@@ -68,8 +68,8 @@ const addConfig = async () => {
   loading.value = true
   try {
     const created = await api.post('/api/configs', {
-      provider:   newConfig.value.provider,
-      api_key:    newConfig.value.apiKey,
+      provider: newConfig.value.provider,
+      api_key: newConfig.value.apiKey,
       model_name: newConfig.value.modelName
     })
     apiConfigs.value.push(created)
