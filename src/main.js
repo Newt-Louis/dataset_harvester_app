@@ -1,10 +1,12 @@
 import axios from 'axios';
 import { createApp } from 'vue';
 import { createI18n } from 'vue-i18n';
+import { createPinia } from 'pinia'
 import App from './App.vue';
 import './style.css';
 import router from './router';
 import PrimeVue from 'primevue/config';
+import ToastService from 'primevue/toastservice'
 import Aura from '@primevue/themes/aura';
 import { definePreset } from '@primevue/themes';
 import Tooltip from 'primevue/tooltip';
@@ -41,6 +43,7 @@ const AIPreset = definePreset(Aura, {
 });
 
 const app = createApp(App);
+app.use(createPinia())
 app.use(router);
 app.use(i18n);
 app.use(PrimeVue,{
@@ -51,5 +54,6 @@ app.use(PrimeVue,{
         }
     }
 });
+app.use(ToastService)
 app.directive('tooltip', Tooltip);
 app.mount('#root');

@@ -9,11 +9,17 @@ import Select from 'primevue/select';
 import DataTable from 'primevue/datatable';
 import Column from 'primevue/column';
 import Tag from 'primevue/tag';
+import { useToast } from 'primevue/usetoast'
+import { useAuthStore } from '@/stores/auth';
+import { useI18n } from 'vue-i18n';
 
+const { t } = useI18n()
 const router = useRouter();
-
+const authStore = useAuthStore()
+const toast     = useToast()
 // Danh sách cấu hình API
 const apiConfigs = ref([]);
+const loading = ref(false)
 
 // Form thêm mới
 const newConfig = ref({
@@ -31,50 +37,94 @@ const providers = ref([
 ]);
 
 // Chạy khi mở trang: Load dữ liệu từ LocalStorage
-onMounted(() => {
-  const savedConfigs = localStorage.getItem('ai_api_configs');
-  if (savedConfigs) {
-    apiConfigs.value = JSON.parse(savedConfigs);
+onMounted(async () => {
+  await fetchConfigs()
+})
+const fetchConfigs = async () => {
+  loading.value = true
+  try {
+    apiConfigs.value = await api.get('/api/configs')
+  } catch (e) {
+    toast.add({ severity: 'error', summary: 'Lỗi', detail: e.message, life: 3000 })
+  } finally {
+    loading.value = false
   }
-});
+}
+// onMounted(() => {
+//   const savedConfigs = localStorage.getItem('ai_api_configs');
+//   if (savedConfigs) {
+//     apiConfigs.value = JSON.parse(savedConfigs);
+//   }
+// });
 
 // Hàm lưu vào LocalStorage
-const saveToLocal = () => {
-  localStorage.setItem('ai_api_configs', JSON.stringify(apiConfigs.value));
+const addConfig = async () => {
+  if (!newConfig.value.apiKey || !newConfig.value.modelName) {
+    toast.add({ severity: 'warn', summary: 'Thiếu thông tin', detail: t('settings.alert_missing_fields'), life: 3000 })
+    return
+  }
+
+  loading.value = true
+  try {
+    const created = await api.post('/api/configs', {
+      provider:   newConfig.value.provider,
+      api_key:    newConfig.value.apiKey,
+      model_name: newConfig.value.modelName
+    })
+    apiConfigs.value.push(created)
+
+    // Reset form
+    newConfig.value.apiKey    = ''
+    newConfig.value.modelName = ''
+
+    toast.add({ severity: 'success', summary: 'Đã thêm', detail: 'Cấu hình mới đã được lưu.', life: 2000 })
+  } catch (e) {
+    toast.add({ severity: 'error', summary: 'Lỗi', detail: e.message, life: 3000 })
+  } finally {
+    loading.value = false
+  }
 };
 
 // Hàm thêm cấu hình mới
-const addConfig = () => {
-  if (!newConfig.value.apiKey || !newConfig.value.modelName) {
-    alert("Vui lòng nhập đủ API Key và Tên Model!");
-    return;
-  }
+// const addConfig = () => {
+//   if (!newConfig.value.apiKey || !newConfig.value.modelName) {
+//     alert("Vui lòng nhập đủ API Key và Tên Model!");
+//     return;
+//   }
 
-  apiConfigs.value.push({
-    id: Date.now(),
-    provider: newConfig.value.provider,
-    apiKey: newConfig.value.apiKey,
-    modelName: newConfig.value.modelName,
-    isActive: true // Mặc định là bật
-  });
+//   apiConfigs.value.push({
+//     id: Date.now(),
+//     provider: newConfig.value.provider,
+//     apiKey: newConfig.value.apiKey,
+//     modelName: newConfig.value.modelName,
+//     isActive: true // Mặc định là bật
+//   });
 
-  saveToLocal();
+//   saveToLocal();
   
-  // Reset form
-  newConfig.value.apiKey = '';
-  newConfig.value.modelName = '';
-};
+//   // Reset form
+//   newConfig.value.apiKey = '';
+//   newConfig.value.modelName = '';
+// };
 
 // Hàm xóa cấu hình
-const removeConfig = (id) => {
-  apiConfigs.value = apiConfigs.value.filter(c => c.id !== id);
-  saveToLocal();
+const removeConfig = async (id) => {
+  try {
+    await api.delete(`/api/configs/${id}`)
+    apiConfigs.value = apiConfigs.value.filter(c => c.id !== id)
+  } catch (e) {
+    toast.add({ severity: 'error', summary: 'Lỗi', detail: e.message, life: 3000 })
+  }
 };
 
 // Hàm bật/tắt cấu hình
-const toggleActive = (config) => {
-  config.isActive = !config.isActive;
-  saveToLocal();
+const toggleActive = async (config) => {
+  try {
+    const updated = await api.patch(`/api/configs/${config.id}/toggle`)
+    config.is_active = updated.is_active
+  } catch (e) {
+    toast.add({ severity: 'error', summary: 'Lỗi', detail: e.message, life: 3000 })
+  }
 };
 </script>
 
