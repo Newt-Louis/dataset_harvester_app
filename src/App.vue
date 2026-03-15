@@ -1,9 +1,16 @@
 <script setup>
 import { ref, onMounted, watch } from 'vue';
+import { useRouter } from 'vue-router';
+import Button from 'primevue/button';
+import Toast from 'primevue/toast';
 import SelectButton from 'primevue/selectbutton';
 import { useI18n } from 'vue-i18n';
+import { useAuthStore } from '@/stores/auth';
 
 const { locale } = useI18n();
+const router = useRouter();
+const authStore = useAuthStore();
+
 const langOptions = [
   { label: 'VN', value: 'vi' },
   { label: 'EN', value: 'en' }
@@ -18,23 +25,14 @@ const themeOptions = [
 
 // Hàm áp dụng màu sắc thực tế
 const applyThemeClass = (isDark) => {
-  const root = document.documentElement;
-  if (isDark) {
-    root.classList.add('app-dark');
-  } else {
-    root.classList.remove('app-dark');
-  }
+  document.documentElement.classList.toggle('app-dark', isDark);
 };
 
 // Hàm xử lý logic chọn Theme
 const handleThemeChange = (mode) => {
   if (mode === 'light') applyThemeClass(false);
   else if (mode === 'dark') applyThemeClass(true);
-  else {
-    // Auto
-    const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-    applyThemeClass(prefersDark);
-  }
+  else applyThemeClass(window.matchMedia('(prefers-color-scheme: dark)').matches);
   localStorage.setItem('theme_preference', mode);
 };
 
@@ -64,6 +62,25 @@ onMounted(() => {
 <template>
   <div class="app-layout">
     <div class="top-controls">
+      <!-- Nút đăng nhập / đăng xuất -->
+      <Button
+        v-if="authStore.isLoggedIn"
+        icon="pi pi-sign-out"
+        label="Đăng xuất"
+        severity="secondary"
+        text
+        size="small"
+        @click="authStore.logout()"
+      />
+      <Button
+        v-else
+        icon="pi pi-sign-in"
+        label="Đăng nhập"
+        severity="secondary"
+        text
+        size="small"
+        @click="router.push('/login')"
+      />
       <SelectButton v-model="locale" :options="langOptions" optionLabel="label" optionValue="value" :allowEmpty="false" class="lang-selector" />
       <SelectButton v-model="themeMode" :options="themeOptions" optionLabel="value" optionValue="value" :allowEmpty="false">
         <template #option="slotProps">

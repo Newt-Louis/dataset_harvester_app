@@ -12,6 +12,7 @@ import Tag from 'primevue/tag';
 import { useToast } from 'primevue/usetoast'
 import { useAuthStore } from '@/stores/auth';
 import { useI18n } from 'vue-i18n';
+import { api } from '@/api';
 
 const { t } = useI18n()
 const router = useRouter();
@@ -38,7 +39,9 @@ const providers = ref([
 
 // Chạy khi mở trang: Load dữ liệu từ LocalStorage
 onMounted(async () => {
-  await fetchConfigs()
+  if (authStore.isLoggedIn) {
+    await fetchConfigs();
+  }
 })
 const fetchConfigs = async () => {
   loading.value = true
@@ -50,15 +53,13 @@ const fetchConfigs = async () => {
     loading.value = false
   }
 }
-// onMounted(() => {
-//   const savedConfigs = localStorage.getItem('ai_api_configs');
-//   if (savedConfigs) {
-//     apiConfigs.value = JSON.parse(savedConfigs);
-//   }
-// });
 
-// Hàm lưu vào LocalStorage
 const addConfig = async () => {
+  // Chưa đăng nhập → chuyển về trang login
+  if (!authStore.isLoggedIn) {
+    router.push('/login');
+    return;
+  }
   if (!newConfig.value.apiKey || !newConfig.value.modelName) {
     toast.add({ severity: 'warn', summary: 'Thiếu thông tin', detail: t('settings.alert_missing_fields'), life: 3000 })
     return
@@ -84,28 +85,6 @@ const addConfig = async () => {
     loading.value = false
   }
 };
-
-// Hàm thêm cấu hình mới
-// const addConfig = () => {
-//   if (!newConfig.value.apiKey || !newConfig.value.modelName) {
-//     alert("Vui lòng nhập đủ API Key và Tên Model!");
-//     return;
-//   }
-
-//   apiConfigs.value.push({
-//     id: Date.now(),
-//     provider: newConfig.value.provider,
-//     apiKey: newConfig.value.apiKey,
-//     modelName: newConfig.value.modelName,
-//     isActive: true // Mặc định là bật
-//   });
-
-//   saveToLocal();
-  
-//   // Reset form
-//   newConfig.value.apiKey = '';
-//   newConfig.value.modelName = '';
-// };
 
 // Hàm xóa cấu hình
 const removeConfig = async (id) => {
@@ -145,9 +124,7 @@ const toggleActive = async (config) => {
           <Button 
             icon="pi pi-database" 
             severity="secondary" 
-            rounded 
-            text 
-            size="large"
+            rounded text size="large"
             :v-tooltip.top="$t('settings.harvester_tooltip')"
             @click="router.push('/harvesting')" 
           />
@@ -156,6 +133,12 @@ const toggleActive = async (config) => {
       </template>
 
       <template #content>
+        <!-- Banner nhắc đăng nhập nếu chưa auth -->
+        <div v-if="!authStore.isLoggedIn" class="login-notice">
+          <i class="pi pi-lock"></i>
+          <span>Bạn cần <a @click="router.push('/login')">đăng nhập</a> để lưu và quản lý cấu hình.</span>
+        </div>
+
         <div class="add-form-container">
           <div class="form-grid">
             <div class="field">
@@ -174,7 +157,13 @@ const toggleActive = async (config) => {
             </div>
             
             <div class="field btn-field">
-              <Button :label="$t('settings.add_btn')" icon="pi pi-plus" @click="addConfig" class="w-full" />
+              <Button
+                :label="authStore.isLoggedIn ? $t('settings.add_btn') : 'Đăng nhập để lưu'"
+                :icon="authStore.isLoggedIn ? 'pi pi-plus' : 'pi pi-sign-in'"
+                :loading="loading"
+                @click="addConfig"
+                class="w-full"
+              />
             </div>
           </div>
         </div>
@@ -235,6 +224,20 @@ const toggleActive = async (config) => {
 .header-title h2 { margin: 0; }
 .subtitle { color: var(--p-text-color-secondary); font-size: 0.9rem; margin-top: 0.5rem; }
 
+/* Banner nhắc đăng nhập */
+.login-notice {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  background: var(--p-yellow-50);
+  border: 1px solid var(--p-yellow-200);
+  border-radius: 8px;
+  padding: 0.75rem 1rem;
+  margin-bottom: 1.5rem;
+  font-size: 0.9rem;
+  color: var(--p-yellow-800);
+}
+
 .add-form-container {
   background: var(--p-surface-50);
   padding: 1.5rem;
@@ -248,6 +251,12 @@ const toggleActive = async (config) => {
   border-color: var(--p-surface-700);
 }
 
+.login-notice a {
+  font-weight: bold;
+  cursor: pointer;
+  text-decoration: underline;
+}
+
 .form-grid {
   display: grid;
   grid-template-columns: 1fr 2fr 2fr auto;
@@ -257,6 +266,12 @@ const toggleActive = async (config) => {
 
 .field { display: flex; flex-direction: column; gap: 0.5rem; }
 .field label { font-weight: bold; font-size: 0.85rem; }
+
+.key-masked {
+  font-family: monospace;
+  font-size: 0.85rem;
+  color: var(--p-text-color-secondary);
+}
 
 @media (max-width: 768px) {
   .form-grid { grid-template-columns: 1fr; }

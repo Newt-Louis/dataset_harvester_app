@@ -7,9 +7,11 @@ import Slider from 'primevue/slider';
 import InputNumber from 'primevue/inputnumber';
 import Button from 'primevue/button';
 import SelectButton from 'primevue/selectbutton';
+import { useAuthStore } from '@/stores/auth';
 import axios from 'axios';
 
 const router = useRouter();
+const authStore = useAuthStore();
 // --- STATE: DỮ LIỆU FORM ---
 const promptStage = ref('');
 const seeds = ref('');
@@ -27,6 +29,12 @@ const outputSchema = ref('{\n  "system": "string",\n  "user": "string",\n  "reas
 
 // --- HÀM GỬI API ---
 const startHarvesting = async () => {
+  // Chưa đăng nhập → chuyển về trang login
+  if (!authStore.isLoggedIn) {
+    router.push('/login');
+    return;
+  }
+
   isGenerating.value = true;
   const seedArray = seeds.value.split('\n').filter(s => s.trim() !== '');
   
@@ -38,9 +46,15 @@ const startHarvesting = async () => {
     samples: numSamples.value
   };
   console.log(payload);
-  const response = await axios.post('/api/generate',payload);
-  if (response.status === 200) {
-    console.log(response.data);
+  try {
+    const response = await axios.post('/api/generate',payload);
+    if (response.status === 200) {
+      console.log(response.data);
+    }
+  } catch (error) {
+    console.log(error);
+  } finally {
+    isGenerating.value = false;
   }
 };
 </script>
@@ -61,9 +75,7 @@ const startHarvesting = async () => {
           <Button 
             icon="pi pi-cog" 
             severity="secondary" 
-            rounded 
-            text 
-            size="large"
+            rounded text size="large"
             v-tooltip.top="'Cấu hình API Keys'"
             @click="router.push('/settings')" 
           />
@@ -99,12 +111,13 @@ const startHarvesting = async () => {
         </div>
 
         <div class="action-bar">
-          <Button 
-            :label="$t('harvester.run_btn')" 
-            icon="pi pi-bolt" 
+          <!-- Nút tự đổi label tuỳ theo trạng thái đăng nhập -->
+          <Button
+            :label="authStore.isLoggedIn ? $t('harvester.run_btn') : 'Đăng nhập để bắt đầu'"
+            :icon="authStore.isLoggedIn ? 'pi pi-bolt' : 'pi pi-sign-in'"
             size="large"
             :loading="isGenerating"
-            @click="startHarvesting" 
+            @click="startHarvesting"
             class="w-full run-btn"
           />
         </div>
