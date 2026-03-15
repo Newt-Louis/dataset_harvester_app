@@ -17,5 +17,22 @@
     "step3_hint": "*Hệ thống sẽ luôn ép AI sinh JSON theo cấu trúc này. Nếu bạn chọn CSV, hệ thống tự động lấy các Keys làm tiêu đề cột.*",
     "step4_label": "4. Số lượng mẫu (Samples) / Hạt giống:",
     "run_btn": "BẮT ĐẦU THU HOẠCH"
+  },
+  "settings": {
+    "subtitle": "Hệ thống sẽ tự động xoay vòng (Rotate) qua các key đang được BẬT để tránh giới hạn Rate Limit.",
+    "harvester_tooltip": "Phòng Thu hoạch (Harvester)",
+    "label_provider": "Nhà cung cấp:",
+    "label_api_key": "API Key:",
+    "label_model_name": "Tên Model (Model ID):",
+    "api_key_placeholder": "Nhập API Key...",
+    "model_name_placeholder": "VD: google/gemma-2-9b-it:free",
+    "add_btn": "Thêm cấu hình",
+    "table_empty": "Chưa có API Key nào được cấu hình.",
+    "col_status": "Trạng thái",
+    "col_actions": "Hành động",
+    "tag_active": "ĐANG BẬT",
+    "tag_inactive": "ĐÃ TẮT",
+    "toggle_tooltip": "Bật/Tắt",
+    "alert_missing_fields": "Vui lòng nhập đủ API Key và Tên Model!"
   }
 }

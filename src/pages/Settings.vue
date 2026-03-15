@@ -98,53 +98,53 @@ const toggleActive = (config) => {
             rounded 
             text 
             size="large"
-            v-tooltip.top="'Phòng Thu hoạch (Harvester)'"
+            :v-tooltip.top="$t('settings.harvester_tooltip')"
             @click="router.push('/harvesting')" 
           />
         </div>
-        <p class="subtitle">Hệ thống sẽ tự động xoay vòng (Rotate) qua các key đang được BẬT để tránh giới hạn Rate Limit.</p>
+        <p class="subtitle">{{ $t('settings.subtitle') }}</p>
       </template>
 
       <template #content>
         <div class="add-form-container">
           <div class="form-grid">
             <div class="field">
-              <label>Nhà cung cấp:</label>
+              <label>{{$t('settings.label_provider')}}</label>
               <Select v-model="newConfig.provider" :options="providers" optionLabel="name" optionValue="code" class="w-full" />
             </div>
             
             <div class="field">
-              <label>API Key:</label>
-              <Password v-model="newConfig.apiKey" toggleMask :feedback="false" placeholder="Nhập API Key..." class="w-full" inputClass="w-full" />
+              <label>{{$t('settings.label_api_key')}}</label>
+              <Password v-model="newConfig.apiKey" toggleMask :feedback="false" :placeholder="$t('settings.api_key_placeholder')" class="w-full" inputClass="w-full" />
             </div>
 
             <div class="field">
-              <label>Tên Model (Model ID):</label>
-              <InputText v-model="newConfig.modelName" placeholder="VD: google/gemma-2-9b-it:free" class="w-full" />
+              <label>{{$t('settings.label_model_name')}}</label>
+              <InputText v-model="newConfig.modelName" :placeholder="$t('settings.model_name_placeholder')" class="w-full" />
             </div>
             
             <div class="field btn-field">
-              <Button label="Thêm cấu hình" icon="pi pi-plus" @click="addConfig" class="w-full" />
+              <Button :label="$t('settings.add_btn')" icon="pi pi-plus" @click="addConfig" class="w-full" />
             </div>
           </div>
         </div>
 
         <div class="table-container">
-          <DataTable :value="apiConfigs" responsiveLayout="scroll" emptyMessage="Chưa có API Key nào được cấu hình.">
-            <Column field="provider" header="Provider" style="width: 15%"></Column>
-            <Column field="modelName" header="Model ID" style="width: 35%"></Column>
-            <Column header="Trạng thái" style="width: 15%">
+          <DataTable :value="apiConfigs" responsiveLayout="scroll" :emptyMessage="$t('settings.table_empty')">
+            <Column field="provider" :header="$t('settings.label_provider')" style="width: 15%"></Column>
+            <Column field="modelName" :header="$t('settings.label_model_name')" style="width: 35%"></Column>
+            <Column :header="$t('settings.col_status')" style="width: 15%">
               <template #body="slotProps">
-                <Tag :severity="slotProps.data.isActive ? 'success' : 'danger'" :value="slotProps.data.isActive ? 'ĐANG BẬT' : 'ĐÃ TẮT'" />
+                <Tag :severity="slotProps.data.isActive ? 'success' : 'danger'" :value="slotProps.data.isActive ? $t('settings.tag_active') : $t('settings.tag_inactive')" />
               </template>
             </Column>
-            <Column header="Hành động" style="width: 35%; text-align: right;">
+            <Column :header="$t('settings.col_actions')" style="width: 35%; text-align: right;">
               <template #body="slotProps">
                 <Button 
                   :icon="slotProps.data.isActive ? 'pi pi-eye-slash' : 'pi pi-eye'" 
                   :severity="slotProps.data.isActive ? 'secondary' : 'info'"
                   text rounded 
-                  v-tooltip.top="'Bật/Tắt'"
+                  :v-tooltip.top="$t('settings.toggle_tooltip')"
                   @click="toggleActive(slotProps.data)" 
                 />
                 <Button icon="pi pi-trash" severity="danger" text rounded @click="removeConfig(slotProps.data.id)" />

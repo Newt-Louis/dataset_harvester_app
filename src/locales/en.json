@@ -17,5 +17,22 @@
     "step3_hint": "*The system will always force AI to generate JSON matching this schema. If you select CSV, the system automatically uses the keys as column headers.*",
     "step4_label": "4. Samples per Seed:",
     "run_btn": "START HARVESTING"
+  },
+  "settings": {
+    "subtitle": "The system will automatically rotate through all ACTIVE keys to avoid Rate Limit restrictions.",
+    "harvester_tooltip": "Harvester Room",
+    "label_provider": "Provider:",
+    "label_api_key": "API Key:",
+    "label_model_name": "Model Name (Model ID):",
+    "api_key_placeholder": "Enter API Key...",
+    "model_name_placeholder": "E.g.: google/gemma-2-9b-it:free",
+    "add_btn": "Add Configuration",
+    "table_empty": "No API Keys have been configured yet.",
+    "col_status": "Status",
+    "col_actions": "Actions",
+    "tag_active": "ACTIVE",
+    "tag_inactive": "INACTIVE",
+    "toggle_tooltip": "Enable/Disable",
+    "alert_missing_fields": "Please fill in both the API Key and Model Name!"
   }
 }
