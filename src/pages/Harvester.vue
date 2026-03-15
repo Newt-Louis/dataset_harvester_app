@@ -8,7 +8,8 @@ import InputNumber from 'primevue/inputnumber';
 import Button from 'primevue/button';
 import SelectButton from 'primevue/selectbutton';
 import { useAuthStore } from '@/stores/auth';
-import axios from 'axios';
+import { useToast } from 'primevue/usetoast';
+import { api } from '@/api/client';
 
 const router = useRouter();
 const authStore = useAuthStore();
@@ -47,12 +48,14 @@ const startHarvesting = async () => {
   };
   console.log(payload);
   try {
-    const response = await axios.post('/api/generate',payload);
+    const response = await api.post('/api/generate',payload);
     if (response.status === 200) {
       console.log(response.data);
+      toast.add({ severity: 'success', summary: 'Thành công', detail: response.message || 'Đã đưa vào hàng đợi chạy nền!', life: 4000 });
     }
   } catch (error) {
     console.log(error);
+    toast.add({ severity: 'error', summary: 'Lỗi', detail: error.message || 'Không thể bắt đầu thu hoạch.', life: 4000 });
   } finally {
     isGenerating.value = false;
   }
