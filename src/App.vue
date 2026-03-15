@@ -61,32 +61,32 @@ onMounted(() => {
 
 <template>
   <div class="app-layout">
-    <div class="top-controls">
+    <div class="header-layout">
       <!-- Nút đăng nhập / đăng xuất -->
-      <Button
-        v-if="authStore.isLoggedIn"
-        icon="pi pi-sign-out"
-        label="Đăng xuất"
-        severity="secondary"
-        text
-        size="small"
-        @click="authStore.logout()"
-      />
-      <Button
-        v-else
-        icon="pi pi-sign-in"
-        label="Đăng nhập"
-        severity="secondary"
-        text
-        size="small"
-        @click="router.push('/login')"
-      />
-      <SelectButton v-model="locale" :options="langOptions" optionLabel="label" optionValue="value" :allowEmpty="false" class="lang-selector" />
-      <SelectButton v-model="themeMode" :options="themeOptions" optionLabel="value" optionValue="value" :allowEmpty="false">
-        <template #option="slotProps">
-          <i :class="slotProps.option.icon" :title="slotProps.option.tooltip"></i>
-        </template>
-      </SelectButton>
+      <div class="login-out-button">
+        <Button
+          v-if="authStore.isLoggedIn"
+          icon="pi pi-sign-out"
+          label="Đăng xuất"
+          severity="secondary" text size="large"
+          @click="authStore.logout()"
+        />
+        <Button
+          v-else
+          icon="pi pi-sign-in"
+          label="Đăng nhập"
+          severity="secondary" text size="large"
+          @click="router.push('/login')"
+        />
+      </div>
+      <div class="top-controls">   
+        <SelectButton v-model="locale" :options="langOptions" optionLabel="label" optionValue="value" :allowEmpty="false" class="lang-selector" />
+        <SelectButton v-model="themeMode" :options="themeOptions" optionLabel="value" optionValue="value" :allowEmpty="false">
+          <template #option="slotProps">
+            <i :class="slotProps.option.icon" :title="slotProps.option.tooltip"></i>
+          </template>
+        </SelectButton>
+      </div>
     </div>
     <main class="main-content">
       <router-view />
@@ -101,15 +101,20 @@ onMounted(() => {
   position: relative;
 }
 
+/* Layout header */
+.header-layout{
+  display: flex;
+  padding: 1.5rem;
+  justify-content: space-between;
+    z-index: 100;
+}
+
 /* Nút chọn theme ở góc phải */
 .top-controls {
-  position: absolute;
-  top: 1.5rem;
-  right: 1.5rem;
-  z-index: 100;
   display: flex;
   gap: 0.5rem;
 }
+
 :deep(.lang-selector .p-togglebutton) { padding: 0.5rem; font-size: 0.85rem; font-weight: bold; }
 .main-content {
   padding: 4rem 1rem 2rem 1rem;
