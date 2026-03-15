@@ -81,14 +81,26 @@ const toggleActive = (config) => {
 <template>
   <div class="settings-wrapper">
     <div class="back-nav">
-      <Button icon="pi pi-arrow-left" label="Trở về" text @click="router.back()" />
+      <Button icon="pi pi-arrow-left" :label="$t('app.home_back')" text @click="router.push('/')" />
     </div>
 
     <Card class="settings-card">
       <template #title>
-        <div class="header-title">
-          <i class="pi pi-cog" style="font-size: 1.5rem; color: var(--p-primary-color);"></i>
-          <h2>Quản lý API Keys & Models</h2>
+        <div class="card-header">
+          <div class="header-title">
+            <i class="pi pi-cog" style="font-size: 1.5rem; color: var(--p-primary-color);"></i>
+            <h2>{{$t('app.keys_models_manage')}}</h2>
+          </div>
+          
+          <Button 
+            icon="pi pi-database" 
+            severity="secondary" 
+            rounded 
+            text 
+            size="large"
+            v-tooltip.top="'Phòng Thu hoạch (Harvester)'"
+            @click="router.push('/harvesting')" 
+          />
         </div>
         <p class="subtitle">Hệ thống sẽ tự động xoay vòng (Rotate) qua các key đang được BẬT để tránh giới hạn Rate Limit.</p>
       </template>
@@ -146,6 +158,11 @@ const toggleActive = (config) => {
 </template>
 
 <style scoped>
+.card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
 .settings-wrapper {
   width: 100%;
   max-width: 900px;

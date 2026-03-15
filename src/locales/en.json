@@ -4,7 +4,9 @@
     "home_subtitle": "Automated data harvesting and generation engine. Build high-quality training datasets for LLMs, Text-to-SQL, and AI Models at the speed of light.",
     "start_btn": "BOOT SYSTEM",
     "home_back": "Home",
-    "api_setting":"API Settings"
+    "api_setting":"API Settings",
+    "keys_models_manage":"Manage API Keys & Models",
+    "prompt_dataset_harvester":"Prompt data collection"
   },
   "harvester": {
     "step1_label": "1. System Prompt & Role:",

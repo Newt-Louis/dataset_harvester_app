@@ -52,9 +52,21 @@ const startHarvesting = async () => {
     </div>
     <Card class="harvester-card">
       <template #title>
-        <div class="header-title">
-          <i class="pi pi-database" style="font-size: 1.5rem; color: var(--p-primary-color);"></i>
-          <h2>AI Dataset Harvester</h2>
+        <div class="card-header">
+          <div class="header-title">
+            <i class="pi pi-database" style="font-size: 1.5rem; color: var(--p-primary-color);"></i>
+            <h2>{{ $t('app.prompt_dataset_harvester') }}</h2>
+          </div>
+          
+          <Button 
+            icon="pi pi-cog" 
+            severity="secondary" 
+            rounded 
+            text 
+            size="large"
+            v-tooltip.top="'Cấu hình API Keys'"
+            @click="router.push('/settings')" 
+          />
         </div>
       </template>
 
@@ -102,6 +114,11 @@ const startHarvesting = async () => {
 </template>
 
 <style scoped>
+.card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
 .harvester-page-wrapper {
   width: 100%;
   max-width: 800px;
