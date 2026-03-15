@@ -221,7 +221,7 @@ const toggleActive = async (config) => {
 }
 
 .header-title { display: flex; align-items: center; gap: 0.75rem; }
-.header-title h2 { margin: 0; }
+.header-title h2 {margin: 0; color: var(--p-primary-color);}
 .subtitle { color: var(--p-text-color-secondary); font-size: 0.9rem; margin-top: 0.5rem; }
 
 /* Banner nhắc đăng nhập */
