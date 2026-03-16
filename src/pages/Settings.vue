@@ -25,8 +25,8 @@ const loading = ref(false)
 // Form thêm mới
 const newConfig = ref({
   provider: 'OpenRouter',
-  apiKey: '',
-  modelName: ''
+  api_key: '',
+  model_name: ''
 });
 
 // Danh sách nhà cung cấp
@@ -60,7 +60,7 @@ const addConfig = async () => {
     router.push('/login');
     return;
   }
-  if (!newConfig.value.apiKey || !newConfig.value.modelName) {
+  if (!newConfig.value.api_key || !newConfig.value.model_name) {
     toast.add({ severity: 'warn', summary: 'Thiếu thông tin', detail: t('settings.alert_missing_fields'), life: 3000 })
     return
   }
@@ -69,14 +69,14 @@ const addConfig = async () => {
   try {
     const created = await api.post('/api/configs', {
       provider: newConfig.value.provider,
-      api_key: newConfig.value.apiKey,
-      model_name: newConfig.value.modelName
+      api_key: newConfig.value.api_key,
+      model_name: newConfig.value.model_name
     })
     apiConfigs.value.push(created)
 
     // Reset form
-    newConfig.value.apiKey    = ''
-    newConfig.value.modelName = ''
+    newConfig.value.api_key    = ''
+    newConfig.value.model_name = ''
 
     toast.add({ severity: 'success', summary: 'Đã thêm', detail: 'Cấu hình mới đã được lưu.', life: 2000 })
   } catch (e) {
@@ -125,7 +125,7 @@ const toggleActive = async (config) => {
             icon="pi pi-database" 
             severity="secondary" 
             rounded text size="large"
-            :v-tooltip.top="$t('settings.harvester_tooltip')"
+            v-tooltip.top="$t('settings.harvester_tooltip')"
             @click="router.push('/harvesting')" 
           />
         </div>
@@ -148,12 +148,12 @@ const toggleActive = async (config) => {
             
             <div class="field">
               <label>{{$t('settings.label_api_key')}}</label>
-              <Password v-model="newConfig.apiKey" toggleMask :feedback="false" :placeholder="$t('settings.api_key_placeholder')" class="w-full" inputClass="w-full" />
+              <Password v-model="newConfig.api_key" toggleMask :feedback="false" :placeholder="$t('settings.api_key_placeholder')" class="w-full" inputClass="w-full" />
             </div>
 
             <div class="field">
               <label>{{$t('settings.label_model_name')}}</label>
-              <InputText v-model="newConfig.modelName" :placeholder="$t('settings.model_name_placeholder')" class="w-full" />
+              <InputText v-model="newConfig.model_name" :placeholder="$t('settings.model_name_placeholder')" class="w-full" />
             </div>
             
             <div class="field btn-field">
@@ -170,20 +170,20 @@ const toggleActive = async (config) => {
 
         <div class="table-container">
           <DataTable :value="apiConfigs" responsiveLayout="scroll" :emptyMessage="$t('settings.table_empty')">
-            <Column field="provider" :header="$t('settings.label_provider')" style="width: 15%"></Column>
-            <Column field="modelName" :header="$t('settings.label_model_name')" style="width: 35%"></Column>
-            <Column :header="$t('settings.col_status')" style="width: 15%">
+            <Column field="provider" :header="$t('settings.label_provider')" style="width: 25%"></Column>
+            <Column field="model_name" :header="$t('settings.label_model_name')" style="width: 40%"></Column>
+            <Column :header="$t('settings.col_status')" style="width: 20%">
               <template #body="slotProps">
-                <Tag :severity="slotProps.data.isActive ? 'success' : 'danger'" :value="slotProps.data.isActive ? $t('settings.tag_active') : $t('settings.tag_inactive')" />
+                <Tag :severity="slotProps.data.is_active ? 'success' : 'danger'" :value="slotProps.data.is_active ? $t('settings.tag_active') : $t('settings.tag_inactive')" />
               </template>
             </Column>
-            <Column :header="$t('settings.col_actions')" style="width: 35%; text-align: right;">
+            <Column :header="$t('settings.col_actions')" style="width: 15%;">
               <template #body="slotProps">
                 <Button 
-                  :icon="slotProps.data.isActive ? 'pi pi-eye-slash' : 'pi pi-eye'" 
-                  :severity="slotProps.data.isActive ? 'secondary' : 'info'"
+                  :icon="slotProps.data.is_active ? 'pi pi-eye-slash' : 'pi pi-eye'"
+                  :severity="slotProps.data.is_active ? 'secondary' : 'info'"
                   text rounded 
-                  :v-tooltip.top="$t('settings.toggle_tooltip')"
+                  v-tooltip.top="$t('settings.toggle_tooltip')"
                   @click="toggleActive(slotProps.data)" 
                 />
                 <Button icon="pi pi-trash" severity="danger" text rounded @click="removeConfig(slotProps.data.id)" />
