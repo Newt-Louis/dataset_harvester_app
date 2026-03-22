@@ -10,13 +10,14 @@ import Dashboard from './pages/Dashboard.vue';
 import TestHarvester from "@/pages/TestHarvester.vue";
 
 const routes = [
-  { path: '/', component: Home },
-  { path: '/dashboard', component: Dashboard, meta: { requiresAuth: true } },
-  { path: '/harvesting', component: Harvester },
-  { path: '/settings', component: Settings },
-  { path: '/login', component: Login, meta: { requiresGuest: true } },
-  { path:'/register', component: Register, meta: { requiresGuest: true } },
+    { path: '/', component: Home },
+    { path: '/dashboard', component: Dashboard, meta: { requiresAuth: true } },
+    { path: '/harvesting', component: Harvester },
+    { path: '/settings', component: Settings },
+    { path: '/login', component: Login, meta: { requiresGuest: true } },
+    { path:'/register', component: Register, meta: { requiresGuest: true } },
     { path: '/test-model/:id', component: TestHarvester, meta: { requiresAuth: true } },
+    { path: '/logs', name:'System Logs', component: import('./pages/SystemLogs.vue'), meta: { requiresAuth: true } },
 ];
 
 const router = createRouter({
