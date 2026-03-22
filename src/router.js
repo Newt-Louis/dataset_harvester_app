@@ -7,6 +7,7 @@ import Settings from './pages/Settings.vue';
 import Login from './pages/Login.vue';
 import Register from './pages/Register.vue';
 import Dashboard from './pages/Dashboard.vue';
+import TestHarvester from "@/pages/TestHarvester.vue";
 
 const routes = [
   { path: '/', component: Home },
@@ -14,7 +15,8 @@ const routes = [
   { path: '/harvesting', component: Harvester },
   { path: '/settings', component: Settings },
   { path: '/login', component: Login, meta: { requiresGuest: true } },
-  { path:'/register', component: Register }
+  { path:'/register', component: Register, meta: { requiresGuest: true } },
+    { path: '/test-model/:id', component: TestHarvester, meta: { requiresAuth: true } },
 ];
 
 const router = createRouter({

@@ -177,16 +177,22 @@ const toggleActive = async (config) => {
                 <Tag :severity="slotProps.data.is_active ? 'success' : 'danger'" :value="slotProps.data.is_active ? $t('settings.tag_active') : $t('settings.tag_inactive')" />
               </template>
             </Column>
-            <Column :header="$t('settings.col_actions')" style="width: 15%;">
+            <Column :header="$t('settings.col_actions')" style="width: 20%; min-width: 150px">
               <template #body="slotProps">
                 <Button 
-                  :icon="slotProps.data.is_active ? 'pi pi-eye-slash' : 'pi pi-eye'"
-                  :severity="slotProps.data.is_active ? 'secondary' : 'info'"
+                  :icon="slotProps.data.is_active ? 'pi pi-power-off' : 'pi pi-bolt'"
+                  :severity="slotProps.data.is_active ? 'danger' : 'success'"
                   text rounded 
                   v-tooltip.top="$t('settings.toggle_tooltip')"
                   @click="toggleActive(slotProps.data)" 
                 />
                 <Button icon="pi pi-trash" severity="danger" text rounded @click="removeConfig(slotProps.data.id)" />
+                <Button
+                  label="Test" size="small" severity="info" outlined
+                  style="margin-left: 0.5rem; padding: 0.2rem 0.6rem;"
+                  v-tooltip.top="'Test thử kết nối và Model'"
+                  @click="router.push(`/test-model/${slotProps.data.id}`)"
+                />
               </template>
             </Column>
           </DataTable>
@@ -204,7 +210,7 @@ const toggleActive = async (config) => {
 }
 .settings-wrapper {
   width: 100%;
-  max-width: 900px;
+  max-width: 80%;
   margin: 0 auto;
 }
 

@@ -63,7 +63,7 @@ onMounted(async () => {
         numSamples.value = state.samples || 10;
       }
     } catch (error) {
-      console.log("Chưa có State cũ hoặc lỗi tải State.");
+      console.log("Chưa có State cũ hoặc lỗi tải State.",error);
     }
   }
 });
@@ -300,7 +300,7 @@ const startHarvesting = async () => {
    ========================================= */
 .harvester-page-wrapper {
   width: 100%;
-  max-width: 900px;
+  max-width: 80%;
   margin: 0 auto;
   padding-bottom: 2rem;
 }
