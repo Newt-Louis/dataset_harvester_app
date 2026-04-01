@@ -5,13 +5,17 @@ import Card from 'primevue/card';
 import Button from 'primevue/button';
 import ProgressBar from 'primevue/progressbar';
 import Tag from 'primevue/tag';
+import Toast from 'primevue/toast';
+import { useToast } from 'primevue/usetoast';
 import { api } from '@/api/client';
 import { useAuthStore } from '@/stores/auth';
 
 const router = useRouter();
 const authStore = useAuthStore();
+const toast = useToast();
 const jobs = ref([]);
 let pollingInterval = null;
+const isStopping = ref(false);
 
 // Hàm gọi API lấy dữ liệu
 const fetchJobs = async () => {
@@ -22,6 +26,41 @@ const fetchJobs = async () => {
     }
   } catch (error) {
     console.error("Lỗi cập nhật Dashboard:", error);
+  }
+};
+
+// Hàm xử lý khi bấm nút Dừng thu hoạch
+const stopHarvesting = async () => {
+  isStopping.value = true; // Bật icon loading
+  try {
+    const response = await api.post('/api/harvesting/stop-harves');
+
+    if (response.status === 'success') {
+      toast.add({
+        severity: 'success',
+        summary: 'Thành công',
+        detail: response.message,
+        life: 4000
+      });
+      fetchJobs();
+    } else {
+      toast.add({
+        severity: 'info',
+        summary: 'Thông báo',
+        detail: response.message,
+        life: 4000
+      });
+    }
+  } catch (error) {
+    console.error("Lỗi khi dừng thu hoạch:", error);
+    toast.add({
+      severity: 'error',
+      summary: 'Lỗi',
+      detail: 'Không thể kết nối đến máy chủ để dừng tác vụ.',
+      life: 4000
+    });
+  } finally {
+    isStopping.value = false;
   }
 };
 
@@ -64,6 +103,7 @@ const calculateProgress = (job) => {
 
 <template>
   <div class="dashboard-wrapper">
+    <Toast />
     <div class="dash-header">
       <div>
         <div class="header-title">
@@ -74,7 +114,10 @@ const calculateProgress = (job) => {
           Xin chào, <strong>{{ authStore.user?.username || authStore.user?.email || 'Kỹ sư' }}</strong>!
         </p>
       </div>
-      <Button label="Thu hoạch mới" icon="pi pi-plus" @click="router.push('/harvesting')" />
+      <div>
+        <Button label="Dừng thu hoạch" severity="danger" icon="pi pi-stop-circle" :loading="isStopping" @click="stopHarvesting" style="margin-right: 12px"/>
+        <Button label="Thu hoạch mới" icon="pi pi-plus" @click="router.push('/harvesting')" />
+      </div>
     </div>
 
     <Card v-if="jobs.length === 0" class="empty-card">
