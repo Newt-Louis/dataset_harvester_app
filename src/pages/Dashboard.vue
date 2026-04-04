@@ -1,5 +1,5 @@
 <script setup>
-import { ref, onMounted, onUnmounted } from 'vue';
+import { ref, onMounted, onUnmounted, nextTick, watch } from 'vue';
 import { useRouter } from 'vue-router';
 import Card from 'primevue/card';
 import Button from 'primevue/button';
@@ -16,6 +16,7 @@ const toast = useToast();
 const jobs = ref([]);
 let pollingInterval = null;
 const isStopping = ref(false);
+const logContainers = ref({}); // Lưu tham chiếu đến các khung log để cuộn
 
 // Hàm gọi API lấy dữ liệu
 const fetchJobs = async () => {
@@ -29,9 +30,18 @@ const fetchJobs = async () => {
   }
 };
 
+// Theo dõi thay đổi của jobs để tự động cuộn log xuống cuối
+watch(jobs, () => {
+  nextTick(() => {
+    Object.values(logContainers.value).forEach(el => {
+      if (el) el.scrollTop = el.scrollHeight;
+    });
+  });
+}, { deep: true });
+
 // Hàm xử lý khi bấm nút Dừng thu hoạch
 const stopHarvesting = async () => {
-  isStopping.value = true; // Bật icon loading
+  isStopping.value = true;
   try {
     const response = await api.post('/api/harvesting/stop-harves');
 
@@ -42,7 +52,6 @@ const stopHarvesting = async () => {
         detail: response.message,
         life: 4000
       });
-      fetchJobs();
     } else {
       toast.add({
         severity: 'info',
@@ -64,18 +73,53 @@ const stopHarvesting = async () => {
   }
 };
 
-// Khi vào trang: Lấy dữ liệu liền, sau đó lặp lại mỗi 3 giây
+// Hàm xử lý download file kết quả
+const handleDownloadResultFile = async (jobId) => {
+  try {
+    const response = await api.get(`/api/harvesting/jobs/${jobId}/download`, {
+      responseType: 'blob'
+    });
+
+    const url = window.URL.createObjectURL(new Blob([response]));
+    const link = document.createElement('a');
+    link.href = url;
+    
+    const job = jobs.value.find(j => j.id === jobId);
+    const fileName = `dataset_${jobId}.${job?.output_format || 'zip'}`;
+    
+    link.setAttribute('download', fileName);
+    document.body.appendChild(link);
+    link.click();
+    
+    link.remove();
+    window.URL.revokeObjectURL(url);
+
+    toast.add({
+      severity: 'success',
+      summary: 'Thành công',
+      detail: 'Bắt đầu tải xuống dataset...',
+      life: 3000
+    });
+  } catch (error) {
+    console.error("Lỗi tải file:", error);
+    toast.add({
+      severity: 'error',
+      summary: 'Lỗi tải file',
+      detail: 'Không thể tải file dataset. Vui lòng thử lại sau.',
+      life: 4000
+    });
+  }
+};
+
 onMounted(() => {
   fetchJobs();
   pollingInterval = setInterval(fetchJobs, 3000);
 });
 
-// Khi rời khỏi trang: Tắt lặp để tiết kiệm tài nguyên
 onUnmounted(() => {
   if (pollingInterval) clearInterval(pollingInterval);
 });
 
-// Các hàm tiện ích cho Giao diện
 const getSeverity = (status) => {
   switch (status) {
     case 'completed': return 'success';
@@ -98,6 +142,16 @@ const calculateProgress = (job) => {
   const total = job.total_seeds * job.target_samples_per_seed;
   if (total === 0) return 0;
   return Math.round((job.samples_generated / total) * 100);
+};
+
+const parseLogs = (logString) => {
+  try {
+    if (!logString) return [];
+    if (Array.isArray(logString)) return logString;
+    return JSON.parse(logString);
+  } catch (e) {
+    return [{ message: logString, type: 'info', time: '' }];
+  }
 };
 </script>
 
@@ -139,19 +193,57 @@ const calculateProgress = (job) => {
             <Tag :severity="getSeverity(job.status)" :value="getStatusLabel(job.status)" />
           </div>
 
-          <div class="job-details">
-            <p><strong>Model đang chạy:</strong> {{ job.current_model || 'Đang nạp...' }}</p>
-            <p><strong>Tiến độ:</strong> {{ job.samples_generated }} / {{ job.total_seeds * job.target_samples_per_seed }} mẫu</p>
+          <div class="job-grid">
+            <!-- Thông tin công việc dạng text đơn giản -->
+            <div class="job-info-frame">
+              <div class="info-content">
+                <p><strong>Mục tiêu:</strong> {{ job.prompt }}</p>
+                <p><strong>Nguồn cấp:</strong> {{ job.current_provider || '---' }} / {{ job.current_model || '---' }}</p>
+                <p><strong>Định dạng yêu cầu:</strong> {{ job.output_format?.toUpperCase() }}</p>
+                <p><strong>Tiến độ mẫu:</strong> {{ job.samples_generated }} / {{ job.total_seeds * job.target_samples_per_seed }} mẫu dữ liệu</p>
+                <p><strong>Vị trí hạt giống:</strong> {{ job.current_seed_index + 1 }} / {{ job.total_seeds }}</p>
+                <p><strong>Ngữ cảnh hạt giống:</strong> {{ job.current_seed_context || '---' }}</p>
+                <p><strong>Quy tắc hạt giống:</strong> {{ job.current_seed_rule || '---' }}</p>
+              </div>
+            </div>
+
+            <!-- Khung Log tuân thủ theme -->
+            <div class="log-frame">
+              <div class="log-header">Lịch sử thu hoạch</div>
+              <div class="log-body" :ref="el => logContainers[job.id] = el">
+                <div v-if="parseLogs(job.log_messages).length === 0" class="log-empty">
+                  Đang khởi tạo kết nối...
+                </div>
+                <div v-for="(log, idx) in parseLogs(job.log_messages)" :key="idx" class="log-item">
+                  <span class="time" v-if="log.time">[{{ log.time }}]</span>
+                  <span :class="['message', log.type || 'info']">{{ log.message }}</span>
+                </div>
+              </div>
+            </div>
           </div>
 
-          <ProgressBar :value="calculateProgress(job)" :showValue="true" style="height: 12px; margin-top: 1rem;" />
+          <div class="progress-section">
+            <div class="progress-info">
+              <span>Tiến độ tổng thể</span>
+              <span>{{ calculateProgress(job) }}%</span>
+            </div>
+            <ProgressBar :value="calculateProgress(job)" :showValue="false" style="height: 6px;" />
+          </div>
 
           <div v-if="job.status === 'completed' && job.output_file_url" class="job-actions">
-            <Button icon="pi pi-download" label="Tải Dataset" severity="success" size="small" outlined />
+            <Button 
+              icon="pi pi-download" 
+              label="Tải Dataset" 
+              severity="success" 
+              size="small" 
+              outlined
+              @click="handleDownloadResultFile(job.id)" 
+            />
           </div>
           
-          <div v-if="job.status === 'failed'" class="error-box">
-            <i class="pi pi-exclamation-triangle"></i> Lỗi: {{ job.error_message }}
+          <div v-if="job.status === 'failed'" class="error-notification">
+            <i class="pi pi-info-circle mr-2"></i> 
+            {{ job.error_message }}
           </div>
         </template>
       </Card>
@@ -160,33 +252,93 @@ const calculateProgress = (job) => {
 </template>
 
 <style scoped>
-.dashboard-wrapper { width: 100%; max-width: 900px; margin: 0 auto; }
-.dash-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem; }
-.header-title {
-  display: flex;
-  align-items: center;
-  gap: 0.75rem;
-}
+.dashboard-wrapper { width: 100%; max-width: 1000px; margin: 0 auto; padding-bottom: 2rem; }
+.dash-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem; }
+.header-title { display: flex; align-items: center; gap: 0.5rem; }
+.welcome-text { margin-top: 0.25rem; color: var(--p-text-color-secondary); }
 
-.welcome-text {
-  margin-top: 0.5rem;
-  font-size: 1.1rem; /* Phóng to chữ */
-  color: var(--p-text-color-secondary);
-}
-.text-center { text-align: center; }
-.text-secondary { color: var(--p-text-color-secondary); margin-bottom: 1.5rem;}
-.py-5 { padding-top: 2rem; padding-bottom: 2rem; }
-
-.job-list { display: flex; flex-direction: column; gap: 1rem; }
-.job-card { border: 1px solid var(--p-surface-200); box-shadow: none; transition: transform 0.2s; }
-.job-card:hover { border-color: var(--p-primary-color); }
+.job-list { display: flex; flex-direction: column; gap: 1.5rem; }
+.job-card { border: 1px solid var(--p-surface-200); box-shadow: none; border-radius: 8px; }
 :global(.app-dark) .job-card { border-color: var(--p-surface-700); background: var(--p-surface-900); }
 
-.job-top { display: flex; justify-content: space-between; margin-bottom: 0.5rem; }
-.job-id { font-weight: bold; color: var(--p-text-color-secondary); font-size: 0.9rem; }
-.job-details p { margin: 0.25rem 0; font-size: 0.95rem; }
+.job-top { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem; border-bottom: 1px solid var(--p-surface-100); padding-bottom: 0.5rem; }
+:global(.app-dark) .job-top { border-color: var(--p-surface-800); }
+.job-id { font-weight: 500; font-size: 0.9rem; color: var(--p-text-color-secondary); }
+
+/* Layout Grid */
+.job-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1rem; }
+@media (max-width: 768px) { .job-grid { grid-template-columns: 1fr; } }
+
+/* Khung thông tin đơn giản */
+.job-info-frame { 
+  border: 1px solid var(--p-surface-100); 
+  border-radius: 6px; 
+  padding: 1rem; 
+  background-color: var(--p-surface-50);
+}
+:global(.app-dark) .job-info-frame { 
+  border-color: var(--p-surface-800); 
+  background-color: var(--p-surface-800); 
+}
+.info-content p { margin: 0.4rem 0; font-size: 0.9rem; line-height: 1.5; color: var(--p-text-color); }
+.info-content strong { color: var(--p-text-color-secondary); margin-right: 4px; }
+
+/* Khung Log tuân thủ Theme */
+.log-frame { 
+  border: 1px solid var(--p-surface-100); 
+  border-radius: 6px; 
+  display: flex; 
+  flex-direction: column; 
+  overflow: hidden;
+  height: 180px;
+}
+:global(.app-dark) .log-frame { border-color: var(--p-surface-800); }
+
+.log-header { 
+  padding: 6px 12px; 
+  font-size: 0.75rem; 
+  font-weight: 600; 
+  background-color: var(--p-surface-100); 
+  color: var(--p-text-color-secondary);
+  border-bottom: 1px solid var(--p-surface-100);
+}
+:global(.app-dark) .log-header { 
+  background-color: var(--p-surface-800); 
+  border-color: var(--p-surface-700); 
+}
+
+.log-body { 
+  flex: 1; 
+  padding: 8px 12px; 
+  overflow-y: auto; 
+  font-size: 0.85rem; 
+  background-color: var(--p-surface-0);
+  color: var(--p-text-color);
+}
+:global(.app-dark) .log-body { background-color: var(--p-surface-900); }
+
+.log-item { margin-bottom: 4px; line-height: 1.4; display: flex; gap: 8px; }
+.time { color: var(--p-text-color-secondary); font-size: 0.75rem; white-space: nowrap; }
+.message.error { color: var(--p-red-500); }
+.message.success { color: var(--p-green-500); }
+.log-empty { color: var(--p-text-color-secondary); text-align: center; margin-top: 2rem; font-style: italic; }
+
+.progress-section { margin-top: 0.5rem; }
+.progress-info { display: flex; justify-content: space-between; font-size: 0.8rem; margin-bottom: 0.4rem; color: var(--p-text-color-secondary); }
 
 .job-actions { margin-top: 1rem; display: flex; justify-content: flex-end; }
-.error-box { margin-top: 1rem; padding: 0.5rem; background: var(--p-red-50); color: var(--p-red-600); border-radius: 6px; font-size: 0.85rem; }
-:global(.app-dark) .error-box { background: rgba(255, 99, 132, 0.1); }
+
+.error-notification { 
+  margin-top: 1rem; 
+  padding: 0.5rem 1rem; 
+  background-color: var(--p-red-50); 
+  color: var(--p-red-600); 
+  border-radius: 4px; 
+  font-size: 0.85rem; 
+}
+:global(.app-dark) .error-notification { background-color: rgba(239, 68, 68, 0.1); color: var(--p-red-400); }
+
+.mr-2 { margin-right: 0.5rem; }
+.py-5 { padding: 2rem 0; }
+.text-center { text-align: center; }
 </style>

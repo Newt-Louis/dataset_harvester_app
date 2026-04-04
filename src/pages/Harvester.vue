@@ -57,10 +57,11 @@ onMounted(async () => {
           seeds.value = JSON.parse(state.seeds);
         }
 
-        // Phục hồi Format, Schema, Samples
+        // Phục hồi Format, Schema, Samples, Delay
         outputFormat.value = state.output_format || 'jsonl';
         outputSchema.value = state.output_schema || outputSchema.value;
         numSamples.value = state.samples || 10;
+        numWaitingTime.value = state.delay || 2;
       }
     } catch (error) {
       console.log("Chưa có State cũ hoặc lỗi tải State.",error);
@@ -93,6 +94,7 @@ const seeds = ref([
 ]);
 
 const numSamples = ref(10);
+const numWaitingTime = ref(2);
 const isGenerating = ref(false);
 
 // ==========================================
@@ -150,7 +152,8 @@ const startHarvesting = async () => {
     schema_definition: outputSchema.value,
     seeds: cleanSeeds,
     format: outputFormat.value,
-    samples: numSamples.value
+    samples: numSamples.value,
+    delay: numWaitingTime.value
   };
 
   try {
@@ -240,7 +243,7 @@ const startHarvesting = async () => {
 
         <!-- KHỐI 3: SCHEMA & SỐ LƯỢNG -->
         <div class="section-block">
-          <h3 class="section-title"><i class="pi pi-box"></i> Định dạng & Khối lượng</h3>
+          <h3 class="section-title"><i class="pi pi-box"></i> Định dạng ,Khối lượng & Thời gian</h3>
 
           <div class="field schema-section">
             <div class="schema-header">
@@ -255,6 +258,13 @@ const startHarvesting = async () => {
             <div class="slider-container">
               <Slider v-model="numSamples" :min="1" :max="100" class="flex-grow" :disabled="isGenerating" />
               <InputNumber v-model="numSamples" :min="1" :max="100" inputClass="fixed-width-input" :disabled="isGenerating" />
+            </div>
+          </div>
+          <div class="field slider-field">
+            <label for="waitingTime">Thời gian nghỉ mỗi request (giây):</label>
+            <div class="slider-container">
+                <Slider v-model="numWaitingTime" :min="1" :max="100" class="flex-grow" :disabled="isGenerating" />
+                <InputNumber id="waitingTime" v-model="numWaitingTime" :min="1" :max="100" inputClass="fixed-width-input" :disabled="isGenerating" />
             </div>
           </div>
         </div>
