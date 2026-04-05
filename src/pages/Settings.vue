@@ -288,15 +288,15 @@ const toggleActive = async (config) => {
 .login-notice a { font-weight: bold; cursor: pointer; text-decoration: underline; }
 
 .add-form-container { 
-  background: var(--p-surface-50); 
+  background: var(--p-surface-50);
   padding: 1.5rem; 
   border-radius: 8px; 
   margin-bottom: 1.5rem; 
   border: 1px dashed var(--p-surface-300); 
 }
-:global(.app-dark) .add-form-container { 
-  background: var(--p-surface-800) !important; 
-  border-color: var(--p-surface-700); 
+:global(.app-dark) .add-form-container {
+  background-color: var(--p-surface-900);
+  border-color: var(--p-surface-700);
 }
 
 .form-grid { display: grid; grid-template-columns: 1fr 2fr 2fr auto; gap: 1rem; align-items: end; }

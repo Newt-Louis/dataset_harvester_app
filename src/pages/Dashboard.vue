@@ -308,7 +308,7 @@ const parseLogs = (logString) => {
 
 /* Khung thông tin đơn giản */
 .job-info-frame { 
-  border: 1px solid var(--p-surface-100); 
+  border: 1px solid var(--p-surface-100);
   border-radius: 6px; 
   padding: 1rem; 
   background-color: var(--p-surface-50);
@@ -316,42 +316,42 @@ const parseLogs = (logString) => {
   flex-direction: column;
   word-break: break-word; /* Chống tràn chữ làm lệch width */
 }
-:global(.app-dark) .job-info-frame { 
-  border-color: var(--p-surface-800); 
+:global(.app-dark) .job-info-frame {
+  border-color: var(--p-surface-800);
   background-color: var(--p-surface-900); /* Đổi từ 800 sang 900 để đồng nhất */
 }
 .info-content p { margin: 0.4rem 0; font-size: 0.9rem; line-height: 1.4; color: var(--p-text-color); }
 .info-content strong { color: var(--p-text-color-secondary); margin-right: 4px; }
 
 /* Khung Log tuân thủ Theme */
-.log-frame { 
-  border: 1px solid var(--p-surface-100); 
-  border-radius: 6px; 
-  display: flex; 
-  flex-direction: column; 
+.log-frame {
+  border: 1px solid var(--p-surface-100);
+  border-radius: 6px;
+  display: flex;
+  flex-direction: column;
   overflow: hidden;
   min-height: 200px; /* Đặt chiều cao tối thiểu thay vì cố định */
 }
 :global(.app-dark) .log-frame { border-color: var(--p-surface-800); }
 
-.log-header { 
-  padding: 6px 12px; 
-  font-size: 0.75rem; 
-  font-weight: 600; 
-  background-color: var(--p-surface-100); 
+.log-header {
+  padding: 6px 12px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  background-color: var(--p-surface-100);
   color: var(--p-text-color-secondary);
   border-bottom: 1px solid var(--p-surface-100);
 }
-:global(.app-dark) .log-header { 
-  background-color: var(--p-surface-800); 
-  border-color: var(--p-surface-700); 
+:global(.app-dark) .log-header {
+  background-color: var(--p-surface-800);
+  border-color: var(--p-surface-700);
 }
 
-.log-body { 
+.log-body {
   flex: 1; /* Tự động lấp đầy chiều cao còn lại của khung log-frame */
-  padding: 8px 12px; 
-  overflow-y: auto; 
-  font-size: 0.85rem; 
+  padding: 8px 12px;
+  overflow-y: auto;
+  font-size: 0.85rem;
   background-color: var(--p-surface-0);
   color: var(--p-text-color);
   max-height: 300px; /* Giới hạn chiều cao tối đa để không quá dài khi nhiều log */
