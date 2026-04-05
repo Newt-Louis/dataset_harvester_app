@@ -150,7 +150,7 @@ const parseLogs = (logString) => {
     if (Array.isArray(logString)) return logString;
     return JSON.parse(logString);
   } catch (e) {
-    return [{ message: logString, type: 'info', time: '' }];
+    return [{ msg: logString, type: 'info', time: '' }];
   }
 };
 </script>
@@ -194,7 +194,7 @@ const parseLogs = (logString) => {
           </div>
 
           <div class="job-grid">
-            <!-- Thông tin công việc dạng text đơn giản -->
+            <!-- Thông tin công việc -->
             <div class="job-info-frame">
               <div class="info-content">
                 <p><strong>Mục tiêu:</strong> {{ job.prompt }}</p>
@@ -216,7 +216,7 @@ const parseLogs = (logString) => {
                 </div>
                 <div v-for="(log, idx) in parseLogs(job.log_messages)" :key="idx" class="log-item">
                   <span class="time" v-if="log.time">[{{ log.time }}]</span>
-                  <span :class="['message', log.type || 'info']">{{ log.message }}</span>
+                  <span :class="['message', log.type || 'info']">{{ log.msg || log.message }}</span>
                 </div>
               </div>
             </div>
@@ -265,8 +265,14 @@ const parseLogs = (logString) => {
 :global(.app-dark) .job-top { border-color: var(--p-surface-800); }
 .job-id { font-weight: 500; font-size: 0.9rem; color: var(--p-text-color-secondary); }
 
-/* Layout Grid */
-.job-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1rem; }
+/* Layout Grid - Đảm bảo chia đều 50/50 và cao bằng nhau */
+.job-grid { 
+  display: grid; 
+  grid-template-columns: repeat(2, minmax(0, 1fr)); 
+  gap: 1rem; 
+  margin-bottom: 1rem; 
+  align-items: stretch; /* Ép các item trong grid có chiều cao bằng nhau */
+}
 @media (max-width: 768px) { .job-grid { grid-template-columns: 1fr; } }
 
 /* Khung thông tin đơn giản */
@@ -275,12 +281,15 @@ const parseLogs = (logString) => {
   border-radius: 6px; 
   padding: 1rem; 
   background-color: var(--p-surface-50);
+  display: flex;
+  flex-direction: column;
+  word-break: break-word; /* Chống tràn chữ làm lệch width */
 }
 :global(.app-dark) .job-info-frame { 
   border-color: var(--p-surface-800); 
   background-color: var(--p-surface-800); 
 }
-.info-content p { margin: 0.4rem 0; font-size: 0.9rem; line-height: 1.5; color: var(--p-text-color); }
+.info-content p { margin: 0.4rem 0; font-size: 0.9rem; line-height: 1.4; color: var(--p-text-color); }
 .info-content strong { color: var(--p-text-color-secondary); margin-right: 4px; }
 
 /* Khung Log tuân thủ Theme */
@@ -290,7 +299,7 @@ const parseLogs = (logString) => {
   display: flex; 
   flex-direction: column; 
   overflow: hidden;
-  height: 180px;
+  min-height: 200px; /* Đặt chiều cao tối thiểu thay vì cố định */
 }
 :global(.app-dark) .log-frame { border-color: var(--p-surface-800); }
 
@@ -308,17 +317,19 @@ const parseLogs = (logString) => {
 }
 
 .log-body { 
-  flex: 1; 
+  flex: 1; /* Tự động lấp đầy chiều cao còn lại của khung log-frame */
   padding: 8px 12px; 
   overflow-y: auto; 
   font-size: 0.85rem; 
   background-color: var(--p-surface-0);
   color: var(--p-text-color);
+  max-height: 300px; /* Giới hạn chiều cao tối đa để không quá dài khi nhiều log */
 }
 :global(.app-dark) .log-body { background-color: var(--p-surface-900); }
 
 .log-item { margin-bottom: 4px; line-height: 1.4; display: flex; gap: 8px; }
 .time { color: var(--p-text-color-secondary); font-size: 0.75rem; white-space: nowrap; }
+.message { word-break: break-all; } /* Đảm bảo text log không phá vỡ layout */
 .message.error { color: var(--p-red-500); }
 .message.success { color: var(--p-green-500); }
 .log-empty { color: var(--p-text-color-secondary); text-align: center; margin-top: 2rem; font-style: italic; }
