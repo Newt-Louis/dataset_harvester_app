@@ -127,6 +127,6 @@ const formatDate = (dateString) => {
   overflow-y: auto;
 }
 :global(.app-dark) .log-message {
-  background-color: #1e1e1e;
+  background-color: var(--p-surface-950);
 }
 </style>

@@ -390,7 +390,7 @@ const startHarvesting = async () => {
 }
 
 .seed-item {
-  background: var(--p-surface-0);
+  background: var(--p-surface-50);
   border: 1px dashed var(--p-surface-300);
   padding: 1rem;
   border-radius: 6px;
@@ -475,7 +475,7 @@ const startHarvesting = async () => {
   background-color: var(--p-surface-100);
 }
 :global(.app-dark) .code-font {
-  background-color: #08111c;
+  background-color: var(--p-surface-950);
 }
 
 /* =========================================

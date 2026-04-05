@@ -1,5 +1,5 @@
 <script setup>
-import { ref, onMounted } from 'vue';
+import { ref, onMounted, computed } from 'vue';
 import { useRouter } from 'vue-router';
 import Card from 'primevue/card';
 import Button from 'primevue/button';
@@ -9,6 +9,8 @@ import Select from 'primevue/select';
 import DataTable from 'primevue/datatable';
 import Column from 'primevue/column';
 import Tag from 'primevue/tag';
+import IconField from 'primevue/iconfield';
+import InputIcon from 'primevue/inputicon';
 import { useToast } from 'primevue/usetoast'
 import { useAuthStore } from '@/stores/auth';
 import { useI18n } from 'vue-i18n';
@@ -21,6 +23,11 @@ const toast     = useToast()
 // Danh sách cấu hình API
 const apiConfigs = ref([]);
 const loading = ref(false)
+
+// State cho bộ lọc và tìm kiếm
+const filterProvider = ref('All');
+const filterStatus = ref('All');
+const searchQuery = ref('');
 
 // Form thêm mới
 const newConfig = ref({
@@ -37,12 +44,23 @@ const providers = ref([
   { name: 'Cohere', code: 'Cohere' }
 ]);
 
-// Chạy khi mở trang: Load dữ liệu từ LocalStorage
+const statusOptions = ref([
+  { name: 'Tất cả trạng thái', code: 'All' },
+  { name: 'Đang bật', code: 'Active' },
+  { name: 'Đang tắt', code: 'Inactive' }
+]);
+
+const providerFilterOptions = computed(() => {
+  return [{ name: 'Tất cả nhà cung cấp', code: 'All' }, ...providers.value];
+});
+
+// Chạy khi mở trang
 onMounted(async () => {
   if (authStore.isLoggedIn) {
     await fetchConfigs();
   }
 })
+
 const fetchConfigs = async () => {
   loading.value = true
   try {
@@ -54,8 +72,44 @@ const fetchConfigs = async () => {
   }
 }
 
+// Logic tìm kiếm Fuzzy Match kiểu VS Code
+const getFuzzyMatch = (text, query) => {
+  if (!query) return { matched: true, matches: [] };
+  const lowerText = text.toLowerCase();
+  const lowerQuery = query.toLowerCase();
+  let matches = [];
+  let textIdx = 0;
+  let queryIdx = 0;
+
+  while (textIdx < text.length && queryIdx < query.length) {
+    if (lowerText[textIdx] === lowerQuery[queryIdx]) {
+      matches.push(textIdx);
+      queryIdx++;
+    }
+    textIdx++;
+  }
+  return { matched: queryIdx === query.length, matches };
+};
+
+// Dữ liệu sau khi lọc và tìm kiếm
+const filteredConfigs = computed(() => {
+  return apiConfigs.value.filter(config => {
+    // Lọc theo Provider
+    const matchProvider = filterProvider.value === 'All' || config.provider === filterProvider.value;
+    
+    // Lọc theo Status
+    const matchStatus = filterStatus.value === 'All' || 
+                       (filterStatus.value === 'Active' && config.is_active) || 
+                       (filterStatus.value === 'Inactive' && !config.is_active);
+    
+    // Tìm kiếm Fuzzy
+    const fuzzy = getFuzzyMatch(config.model_name, searchQuery.value);
+    
+    return matchProvider && matchStatus && fuzzy.matched;
+  });
+});
+
 const addConfig = async () => {
-  // Chưa đăng nhập → chuyển về trang login
   if (!authStore.isLoggedIn) {
     router.push('/login');
     return;
@@ -73,11 +127,8 @@ const addConfig = async () => {
       model_name: newConfig.value.model_name
     })
     apiConfigs.value.push(created)
-
-    // Reset form
     newConfig.value.api_key    = ''
     newConfig.value.model_name = ''
-
     toast.add({ severity: 'success', summary: 'Đã thêm', detail: 'Cấu hình mới đã được lưu.', life: 2000 })
   } catch (e) {
     toast.add({ severity: 'error', summary: 'Lỗi', detail: e.message, life: 3000 })
@@ -86,7 +137,6 @@ const addConfig = async () => {
   }
 };
 
-// Hàm xóa cấu hình
 const removeConfig = async (id) => {
   try {
     await api.delete(`/api/configs/${id}`)
@@ -96,7 +146,6 @@ const removeConfig = async (id) => {
   }
 };
 
-// Hàm bật/tắt cấu hình
 const toggleActive = async (config) => {
   try {
     const updated = await api.patch(`/api/configs/${config.id}/toggle`)
@@ -133,29 +182,26 @@ const toggleActive = async (config) => {
       </template>
 
       <template #content>
-        <!-- Banner nhắc đăng nhập nếu chưa auth -->
         <div v-if="!authStore.isLoggedIn" class="login-notice">
           <i class="pi pi-lock"></i>
           <span>Bạn cần <a @click="router.push('/login')">đăng nhập</a> để lưu và quản lý cấu hình.</span>
         </div>
 
+        <!-- Form thêm mới -->
         <div class="add-form-container">
           <div class="form-grid">
             <div class="field">
               <label>{{$t('settings.label_provider')}}</label>
               <Select v-model="newConfig.provider" :options="providers" optionLabel="name" optionValue="code" class="w-full" />
             </div>
-            
             <div class="field">
               <label>{{$t('settings.label_api_key')}}</label>
               <Password v-model="newConfig.api_key" toggleMask :feedback="false" :placeholder="$t('settings.api_key_placeholder')" class="w-full" inputClass="w-full" />
             </div>
-
             <div class="field">
               <label>{{$t('settings.label_model_name')}}</label>
               <InputText v-model="newConfig.model_name" :placeholder="$t('settings.model_name_placeholder')" class="w-full" />
             </div>
-            
             <div class="field btn-field">
               <Button
                 :label="authStore.isLoggedIn ? $t('settings.add_btn') : 'Đăng nhập để lưu'"
@@ -168,10 +214,36 @@ const toggleActive = async (config) => {
           </div>
         </div>
 
+        <!-- Thanh công cụ: Bộ lọc & Search -->
+        <div class="toolbar-container">
+          <div class="filter-group">
+            <Select v-model="filterProvider" :options="providerFilterOptions" optionLabel="name" optionValue="code" placeholder="Lọc Nhà cung cấp" class="filter-select" />
+            <Select v-model="filterStatus" :options="statusOptions" optionLabel="name" optionValue="code" placeholder="Trạng thái" class="filter-select" />
+          </div>
+          <IconField iconPosition="left" class="search-field">
+            <InputIcon class="pi pi-search" />
+            <InputText v-model="searchQuery" placeholder="Tìm tên model (Ví dụ: nourse/hemes-3)..." class="w-full" />
+          </IconField>
+        </div>
+
         <div class="table-container">
-          <DataTable :value="apiConfigs" responsiveLayout="scroll" :emptyMessage="$t('settings.table_empty')">
-            <Column field="provider" :header="$t('settings.label_provider')" style="width: 25%"></Column>
-            <Column field="model_name" :header="$t('settings.label_model_name')" style="width: 40%"></Column>
+          <DataTable :value="filteredConfigs" responsiveLayout="scroll" :emptyMessage="$t('settings.table_empty')" :loading="loading">
+            <Column field="provider" :header="$t('settings.label_provider')" style="width: 20%"></Column>
+            <Column :header="$t('settings.label_model_name')" style="width: 40%">
+              <template #body="slotProps">
+                <div class="model-name-display">
+                  <template v-if="!searchQuery">
+                    {{ slotProps.data.model_name }}
+                  </template>
+                  <template v-else>
+                    <span v-for="(char, idx) in slotProps.data.model_name" :key="idx" 
+                          :class="{ 'highlight': getFuzzyMatch(slotProps.data.model_name, searchQuery).matches.includes(idx) }">
+                      {{ char }}
+                    </span>
+                  </template>
+                </div>
+              </template>
+            </Column>
             <Column :header="$t('settings.col_status')" style="width: 20%">
               <template #body="slotProps">
                 <Tag :severity="slotProps.data.is_active ? 'success' : 'danger'" :value="slotProps.data.is_active ? $t('settings.tag_active') : $t('settings.tag_inactive')" />
@@ -203,85 +275,50 @@ const toggleActive = async (config) => {
 </template>
 
 <style scoped>
-.card-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-}
-.settings-wrapper {
-  width: 100%;
-  max-width: 80%;
-  margin: 0 auto;
-}
-
+.card-header { display: flex; justify-content: space-between; align-items: center; }
+.settings-wrapper { width: 100%; max-width: 900px; margin: 0 auto; padding-bottom: 2rem; }
 .back-nav { margin-bottom: 1rem; }
-
-.settings-card {
-  box-shadow: 0 4px 20px rgba(0, 212, 255, 0.08);
-  border: 1px solid var(--p-surface-200);
-  border-radius: 16px;
-}
-
-:global(.app-dark) .settings-card {
-  border: 1px solid var(--p-surface-800);
-}
-
+.settings-card { box-shadow: 0 4px 20px rgba(0, 212, 255, 0.08); border: 1px solid var(--p-surface-200); border-radius: 16px; }
+:global(.app-dark) .settings-card { border: 1px solid var(--p-surface-800); }
 .header-title { display: flex; align-items: center; gap: 0.75rem; }
-.header-title h2 {margin: 0; color: var(--p-primary-color);}
+.header-title h2 { margin: 0; color: var(--p-primary-color); }
 .subtitle { color: var(--p-text-color-secondary); font-size: 0.9rem; margin-top: 0.5rem; }
 
-/* Banner nhắc đăng nhập */
-.login-notice {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  background: var(--p-yellow-50);
-  border: 1px solid var(--p-yellow-200);
-  border-radius: 8px;
-  padding: 0.75rem 1rem;
-  margin-bottom: 1.5rem;
-  font-size: 0.9rem;
-  color: var(--p-yellow-800);
+.login-notice { display: flex; align-items: center; gap: 0.5rem; background: var(--p-yellow-50); border: 1px solid var(--p-yellow-200); border-radius: 8px; padding: 0.75rem 1rem; margin-bottom: 1.5rem; font-size: 0.9rem; color: var(--p-yellow-800); }
+.login-notice a { font-weight: bold; cursor: pointer; text-decoration: underline; }
+
+.add-form-container { 
+  background: var(--p-surface-50); 
+  padding: 1.5rem; 
+  border-radius: 8px; 
+  margin-bottom: 1.5rem; 
+  border: 1px dashed var(--p-surface-300); 
+}
+:global(.app-dark) .add-form-container { 
+  background: var(--p-surface-800) !important; 
+  border-color: var(--p-surface-700); 
 }
 
-.add-form-container {
-  background: var(--p-surface-50);
-  padding: 1.5rem;
-  border-radius: 8px;
-  margin-bottom: 2rem;
-  border: 1px dashed var(--p-surface-300);
-}
-
-:global(.app-dark) .add-form-container {
-  background: rgba(255, 255, 255, 0.02);
-  border-color: var(--p-surface-700);
-}
-
-.login-notice a {
-  font-weight: bold;
-  cursor: pointer;
-  text-decoration: underline;
-}
-
-.form-grid {
-  display: grid;
-  grid-template-columns: 1fr 2fr 2fr auto;
-  gap: 1rem;
-  align-items: end;
-}
-
+.form-grid { display: grid; grid-template-columns: 1fr 2fr 2fr auto; gap: 1rem; align-items: end; }
 .field { display: flex; flex-direction: column; gap: 0.5rem; }
 .field label { font-weight: bold; font-size: 0.85rem; }
 
-.key-masked {
-  font-family: monospace;
-  font-size: 0.85rem;
-  color: var(--p-text-color-secondary);
-}
+/* Toolbar styles */
+.toolbar-container { display: flex; justify-content: space-between; align-items: center; gap: 1rem; margin-bottom: 1rem; padding: 0.5rem 0; border-top: 1px solid var(--p-surface-100); padding-top: 1.5rem; }
+:global(.app-dark) .toolbar-container { border-color: var(--p-surface-800); }
+.filter-group { display: flex; gap: 10px; }
+.filter-select { min-width: 180px; }
+.search-field { flex: 1; max-width: 400px; }
 
+/* Highlight styles */
+.model-name-display { font-family: monospace; font-size: 0.95rem; }
+.highlight { background-color: #a5f3fc; color: #000; border-radius: 2px; padding: 0 1px; }
+:global(.app-dark) .highlight { background-color: #0e7490; color: #fff; }
+
+.table-container { margin-top: 0.5rem; }
 @media (max-width: 768px) {
   .form-grid { grid-template-columns: 1fr; }
+  .toolbar-container { flex-direction: column; align-items: stretch; }
+  .filter-group { flex-direction: column; }
 }
-
-.table-container { margin-top: 1rem; }
 </style>

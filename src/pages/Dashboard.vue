@@ -16,6 +16,7 @@ const toast = useToast();
 const jobs = ref([]);
 let pollingInterval = null;
 const isStopping = ref(false);
+const isCleaning = ref(false);
 const logContainers = ref({}); // Lưu tham chiếu đến các khung log để cuộn
 
 // Hàm gọi API lấy dữ liệu
@@ -70,6 +71,34 @@ const stopHarvesting = async () => {
     });
   } finally {
     isStopping.value = false;
+  }
+};
+
+// Hàm xử lý khi bấm nút Làm sạch Dashboard
+const cleanupDashboard = async () => {
+  isCleaning.value = true;
+  try {
+    const response = await api.delete('/api/dashboard/cleanup');
+    if (response.status === 'success') {
+      toast.add({
+        severity: 'success',
+        summary: 'Thành công',
+        detail: response.message,
+        life: 3000
+      });
+      // Xóa dữ liệu local để giao diện cập nhật ngay
+      jobs.value = [];
+    }
+  } catch (error) {
+    console.error("Lỗi khi làm sạch Dashboard:", error);
+    toast.add({
+      severity: 'error',
+      summary: 'Lỗi',
+      detail: 'Không thể làm sạch lịch sử Dashboard.',
+      life: 4000
+    });
+  } finally {
+    isCleaning.value = false;
   }
 };
 
@@ -168,8 +197,9 @@ const parseLogs = (logString) => {
           Xin chào, <strong>{{ authStore.user?.username || authStore.user?.email || 'Kỹ sư' }}</strong>!
         </p>
       </div>
-      <div>
-        <Button label="Dừng thu hoạch" severity="danger" icon="pi pi-stop-circle" :loading="isStopping" @click="stopHarvesting" style="margin-right: 12px"/>
+      <div class="header-actions">
+        <Button label="Dừng thu hoạch" severity="danger" icon="pi pi-stop-circle" :loading="isStopping" @click="stopHarvesting" />
+        <Button label="Làm sạch" severity="success" icon="pi pi-trash" :loading="isCleaning" @click="cleanupDashboard" />
         <Button label="Thu hoạch mới" icon="pi pi-plus" @click="router.push('/harvesting')" />
       </div>
     </div>
@@ -201,7 +231,7 @@ const parseLogs = (logString) => {
                 <p><strong>Nguồn cấp:</strong> {{ job.current_provider || '---' }} / {{ job.current_model || '---' }}</p>
                 <p><strong>Định dạng yêu cầu:</strong> {{ job.output_format?.toUpperCase() }}</p>
                 <p><strong>Tiến độ mẫu:</strong> {{ job.samples_generated }} / {{ job.total_seeds * job.target_samples_per_seed }} mẫu dữ liệu</p>
-                <p><strong>Vị trí hạt giống:</strong> {{ job.current_seed_index }} / {{ job.total_seeds }}</p>
+                <p><strong>Vị trí hạt giống:</strong> {{ job.current_seed_index + 1 }} / {{ job.total_seeds }}</p>
                 <p><strong>Ngữ cảnh hạt giống:</strong> {{ job.current_seed_context || '---' }}</p>
                 <p><strong>Quy tắc hạt giống:</strong> {{ job.current_seed_rule || '---' }}</p>
               </div>
@@ -256,6 +286,7 @@ const parseLogs = (logString) => {
 .dash-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem; }
 .header-title { display: flex; align-items: center; gap: 0.5rem; }
 .welcome-text { margin-top: 0.25rem; color: var(--p-text-color-secondary); }
+.header-actions { display: flex; gap: 12px; }
 
 .job-list { display: flex; flex-direction: column; gap: 1.5rem; }
 .job-card { border: 1px solid var(--p-surface-200); box-shadow: none; border-radius: 8px; }
@@ -287,7 +318,7 @@ const parseLogs = (logString) => {
 }
 :global(.app-dark) .job-info-frame { 
   border-color: var(--p-surface-800); 
-  background-color: var(--p-surface-800); 
+  background-color: var(--p-surface-900); /* Đổi từ 800 sang 900 để đồng nhất */
 }
 .info-content p { margin: 0.4rem 0; font-size: 0.9rem; line-height: 1.4; color: var(--p-text-color); }
 .info-content strong { color: var(--p-text-color-secondary); margin-right: 4px; }
@@ -325,7 +356,7 @@ const parseLogs = (logString) => {
   color: var(--p-text-color);
   max-height: 300px; /* Giới hạn chiều cao tối đa để không quá dài khi nhiều log */
 }
-:global(.app-dark) .log-body { background-color: var(--p-surface-900); }
+:global(.app-dark) .log-body { background-color: var(--p-surface-950); } /* Đậm hơn cho phần log body */
 
 .log-item { margin-bottom: 4px; line-height: 1.4; display: flex; gap: 8px; }
 .time { color: var(--p-text-color-secondary); font-size: 0.75rem; white-space: nowrap; }

@@ -94,6 +94,7 @@ const handleRegister = async () => {
   display: flex;
   align-items: center;
   justify-content: center;
+  background-color: var(--bg-color);
 }
 
 .auth-card {

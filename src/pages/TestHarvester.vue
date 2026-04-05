@@ -205,7 +205,7 @@ const runTest = async () => {
   font-size: 0.85rem;
   background-color: var(--p-surface-100);
 }
-:global(.app-dark) .code-font { background-color: #08111c; }
+:global(.app-dark) .code-font { background-color: var(--p-surface-950); }
 
 .seed-block {
   background: var(--p-surface-50);
@@ -226,7 +226,7 @@ const runTest = async () => {
 .console-box {
   flex-grow: 1;
   min-height: 400px;
-  background-color: #1e1e1e;
+  background-color: var(--p-surface-950);
   border-radius: 8px;
   padding: 1rem;
   overflow-y: auto;
