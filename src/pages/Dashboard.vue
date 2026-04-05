@@ -290,10 +290,8 @@ const parseLogs = (logString) => {
 
 .job-list { display: flex; flex-direction: column; gap: 1.5rem; }
 .job-card { border: 1px solid var(--p-surface-200); box-shadow: none; border-radius: 8px; }
-:global(.app-dark) .job-card { border-color: var(--p-surface-700); background: var(--p-surface-900); }
 
 .job-top { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem; border-bottom: 1px solid var(--p-surface-100); padding-bottom: 0.5rem; }
-:global(.app-dark) .job-top { border-color: var(--p-surface-800); }
 .job-id { font-weight: 500; font-size: 0.9rem; color: var(--p-text-color-secondary); }
 
 /* Layout Grid - Đảm bảo chia đều 50/50 và cao bằng nhau */
@@ -302,65 +300,58 @@ const parseLogs = (logString) => {
   grid-template-columns: repeat(2, minmax(0, 1fr)); 
   gap: 1rem; 
   margin-bottom: 1rem; 
-  align-items: stretch; /* Ép các item trong grid có chiều cao bằng nhau */
+  align-items: stretch; 
 }
 @media (max-width: 768px) { .job-grid { grid-template-columns: 1fr; } }
 
-/* Khung thông tin đơn giản */
+/* Khung thông tin đơn giản - SỬ DỤNG BIẾN CUSTOM */
 .job-info-frame { 
-  border: 1px solid var(--p-surface-100);
+  border: 1px solid var(--custom-border); 
   border-radius: 6px; 
   padding: 1rem; 
-  background-color: var(--p-surface-50);
+  background-color: var(--custom-bg);
   display: flex;
   flex-direction: column;
-  word-break: break-word; /* Chống tràn chữ làm lệch width */
+  word-break: break-word; 
 }
-:global(.app-dark) .job-info-frame {
-  border-color: var(--p-surface-800);
-  background-color: var(--p-surface-900); /* Đổi từ 800 sang 900 để đồng nhất */
-}
-.info-content p { margin: 0.4rem 0; font-size: 0.9rem; line-height: 1.4; color: var(--p-text-color); }
+.info-content p { margin: 0.4rem 0; font-size: 0.9rem; line-height: 1.4; color: var(--custom-text); }
 .info-content strong { color: var(--p-text-color-secondary); margin-right: 4px; }
 
-/* Khung Log tuân thủ Theme */
-.log-frame {
-  border: 1px solid var(--p-surface-100);
-  border-radius: 6px;
-  display: flex;
-  flex-direction: column;
+/* Khung Log tuân thủ theme - SỬ DỤNG BIẾN CUSTOM */
+.log-frame { 
+  border: 1px solid var(--custom-border); 
+  border-radius: 6px; 
+  display: flex; 
+  flex-direction: column; 
   overflow: hidden;
-  min-height: 200px; /* Đặt chiều cao tối thiểu thay vì cố định */
+  min-height: 200px; 
 }
-:global(.app-dark) .log-frame { border-color: var(--p-surface-800); }
 
-.log-header {
-  padding: 6px 12px;
-  font-size: 0.75rem;
-  font-weight: 600;
-  background-color: var(--p-surface-100);
+.log-header { 
+  padding: 6px 12px; 
+  font-size: 0.75rem; 
+  font-weight: 600; 
+  background-color: var(--custom-bg);
   color: var(--p-text-color-secondary);
-  border-bottom: 1px solid var(--p-surface-100);
+  border-bottom: 1px solid var(--custom-border);
 }
-:global(.app-dark) .log-header {
-  background-color: var(--p-surface-800);
-  border-color: var(--p-surface-700);
+:global(.app-dark) .log-header { 
+  background-color: var(--p-surface-800); 
 }
 
-.log-body {
-  flex: 1; /* Tự động lấp đầy chiều cao còn lại của khung log-frame */
-  padding: 8px 12px;
-  overflow-y: auto;
-  font-size: 0.85rem;
-  background-color: var(--p-surface-0);
-  color: var(--p-text-color);
-  max-height: 300px; /* Giới hạn chiều cao tối đa để không quá dài khi nhiều log */
+.log-body { 
+  flex: 1; 
+  padding: 8px 12px; 
+  overflow-y: auto; 
+  font-size: 0.85rem; 
+  background-color: var(--custom-bg);
+  color: var(--custom-text);
+  max-height: 300px; 
 }
-:global(.app-dark) .log-body { background-color: var(--p-surface-950); } /* Đậm hơn cho phần log body */
 
 .log-item { margin-bottom: 4px; line-height: 1.4; display: flex; gap: 8px; }
 .time { color: var(--p-text-color-secondary); font-size: 0.75rem; white-space: nowrap; }
-.message { word-break: break-all; } /* Đảm bảo text log không phá vỡ layout */
+.message { word-break: break-all; } 
 .message.error { color: var(--p-red-500); }
 .message.success { color: var(--p-green-500); }
 .log-empty { color: var(--p-text-color-secondary); text-align: center; margin-top: 2rem; font-style: italic; }

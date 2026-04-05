@@ -266,28 +266,48 @@ const startHarvesting = async () => {
 .harvester-page-wrapper { width: 100%; max-width: 80%; margin: 0 auto; padding-bottom: 2rem; }
 .back-nav { margin-bottom: 1rem; }
 .harvester-card { box-shadow: 0 4px 20px rgba(0, 212, 255, 0.08); border: 1px solid var(--p-surface-200); border-radius: 16px; }
-:global(.app-dark) .harvester-card { border-color: rgba(255, 255, 255, 0.15) !important; background-color: #111827 !important; }
 
 .card-header { display: flex; justify-content: space-between; align-items: center; }
 .header-title { display: flex; align-items: center; gap: 0.75rem; margin-bottom: 0.5rem; }
 .header-title h2 { margin: 0; color: var(--p-primary-color); }
 
-.section-block { background: var(--p-surface-50); border: 1px solid var(--p-surface-200); border-radius: 8px; padding: 1.5rem; margin-bottom: 1.5rem; }
-:global(.app-dark) .section-block { background: #0B1120 !important; border-color: rgba(255, 255, 255, 0.1) !important; }
+/* Sử dụng BIẾN CUSTOM */
+.section-block { 
+  background: var(--custom-bg); 
+  border: 1px solid var(--custom-border); 
+  border-radius: 8px; 
+  padding: 1.5rem; 
+  margin-bottom: 1.5rem; 
+}
 
-.section-title { margin-top: 0; margin-bottom: 1.5rem; color: var(--p-text-color); font-size: 1.1rem; display: flex; align-items: center; gap: 0.5rem; border-bottom: 2px solid var(--p-surface-200); padding-bottom: 0.5rem; }
-:global(.app-dark) .section-title { border-color: rgba(255, 255, 255, 0.1) !important; color: #ffffff !important; }
+.section-title { 
+  margin-top: 0; 
+  margin-bottom: 1.5rem; 
+  color: var(--custom-text); 
+  font-size: 1.1rem; 
+  display: flex; 
+  align-items: center; 
+  gap: 0.5rem; 
+  border-bottom: 2px solid var(--custom-border); 
+  padding-bottom: 0.5rem; 
+}
 
 .seed-header-wrap { display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; }
-.seed-item { background: var(--p-surface-0); border: 1px dashed var(--p-surface-300); padding: 1rem; border-radius: 6px; margin-bottom: 1rem; }
-:global(.app-dark) .seed-item { background: #111827 !important; border-color: rgba(255, 255, 255, 0.15) !important; }
+
+/* Sử dụng BIẾN CUSTOM */
+.seed-item { 
+  background: var(--custom-bg); 
+  border: 1px dashed var(--custom-border); 
+  padding: 1rem; 
+  border-radius: 6px; 
+  margin-bottom: 1rem; 
+}
 
 .seed-item-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem; }
 .seed-badge { background: var(--p-primary-color); color: white; padding: 0.2rem 0.6rem; border-radius: 4px; font-size: 0.8rem; font-weight: bold; }
 
 .field { display: flex; flex-direction: column; gap: 0.5rem; margin-bottom: 1.2rem; }
-.field label { display: block; margin-bottom: 0.2rem; font-weight: 600; color: var(--p-text-color); font-size: 0.95rem; }
-:global(.app-dark) .field label { color: #ffffff !important; }
+.field label { display: block; margin-bottom: 0.2rem; font-weight: 600; color: var(--custom-text); font-size: 0.95rem; }
 
 .w-full { width: 100%; }
 .mb-0 { margin-bottom: 0 !important; }
@@ -296,8 +316,15 @@ const startHarvesting = async () => {
 
 .schema-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem; }
 .format-selector { transform: scale(0.85); transform-origin: right center; }
-.code-font { font-family: 'Courier New', Courier, monospace; font-size: 0.9rem; background-color: var(--p-surface-100); }
-:global(.app-dark) .code-font { background-color: #0B1120 !important; color: #ffffff !important; border: 1px solid rgba(255, 255, 255, 0.1) !important; }
+
+/* Sử dụng BIẾN CUSTOM cho khung code */
+.code-font { 
+  font-family: 'Courier New', Courier, monospace; 
+  font-size: 0.9rem; 
+  background-color: var(--custom-bg); 
+  color: var(--custom-text);
+  border: 1px solid var(--custom-border);
+}
 
 .slider-container { display: flex; align-items: center; gap: 1.5rem; margin-top: 0.5rem; width: 100%; }
 .flex-grow { flex-grow: 1; }

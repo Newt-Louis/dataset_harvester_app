@@ -1,11 +1,19 @@
 /* Nền mặc định cho Light Mode */
 :root {
   --bg-color: #f1f5f9;
+  /* Biến tùy chỉnh cho Component riêng */
+  --custom-bg: var(--p-surface-50);
+  --custom-border: var(--p-surface-200);
+  --custom-text: var(--p-text-color);
 }
 
 /* Đổi nền khi vào Dark Mode */
 :root.app-dark {
   --bg-color: #0B1120;
+  /* Biến tùy chỉnh cho Component riêng (Dark Mode) */
+  --custom-bg: #111827;
+  --custom-border: rgba(255, 255, 255, 0.15);
+  --custom-text: #ffffff;
 }
 
 body {
@@ -14,70 +22,6 @@ body {
   font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
   background-color: var(--bg-color);
   color: var(--p-text-color);
-}
-
-/* ÉP THEME DARK CHO MỌI THÀNH PHẦN KHI .app-dark ĐƯỢC BẬT */
-:root.app-dark body {
-    color: #ffffff !important;
-}
-
-/* Các thẻ tiêu đề, đoạn văn mặc định */
-:root.app-dark h1, :root.app-dark h2, :root.app-dark h3, :root.app-dark p, :root.app-dark label, :root.app-dark span:not([class*="pi-"]):not(.p-tag-label) {
-    color: #ffffff !important;
-}
-
-/* Khung Card */
-:root.app-dark .p-card {
-    background-color: #111827 !important;
-    color: #ffffff !important;
-    border: 1px solid rgba(255, 255, 255, 0.15) !important;
-}
-
-/* Ô nhập liệu: Input, Textarea, Password, v.v. */
-:root.app-dark .p-inputtext,
-:root.app-dark .p-textarea,
-:root.app-dark .p-password input,
-:root.app-dark .p-inputnumber input,
-:root.app-dark .p-select,
-:root.app-dark .p-select-label {
-    background-color: #0B1120 !important;
-    color: #ffffff !important;
-    border: 1px solid rgba(255, 255, 255, 0.2) !important;
-}
-
-/* Trạng thái hover/focus của ô nhập liệu */
-:root.app-dark .p-inputtext:enabled:hover,
-:root.app-dark .p-textarea:enabled:hover {
-    border-color: var(--p-primary-color) !important;
-}
-
-/* Bảng dữ liệu DataTable */
-:root.app-dark .p-datatable-thead > tr > th {
-    background-color: #1f2937 !important;
-    color: #ffffff !important;
-    border-color: rgba(255, 255, 255, 0.1) !important;
-}
-
-:root.app-dark .p-datatable-tbody > tr {
-    background-color: #111827 !important;
-    color: #ffffff !important;
-}
-
-:root.app-dark .p-datatable-tbody > tr > td {
-    border-color: rgba(255, 255, 255, 0.1) !important;
-}
-
-/* Hộp thoại Dialog */
-:root.app-dark .p-dialog {
-    background-color: #111827 !important;
-    border: 1px solid rgba(255, 255, 255, 0.2) !important;
-}
-
-:root.app-dark .p-dialog-header,
-:root.app-dark .p-dialog-content,
-:root.app-dark .p-dialog-footer {
-    background-color: #111827 !important;
-    color: #ffffff !important;
 }
 
 /* Các class tiện ích dùng chung */

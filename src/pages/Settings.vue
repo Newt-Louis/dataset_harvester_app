@@ -20,23 +20,19 @@ const { t } = useI18n()
 const router = useRouter();
 const authStore = useAuthStore()
 const toast     = useToast()
-// Danh sách cấu hình API
 const apiConfigs = ref([]);
 const loading = ref(false)
 
-// State cho bộ lọc và tìm kiếm
 const filterProvider = ref('All');
 const filterStatus = ref('All');
 const searchQuery = ref('');
 
-// Form thêm mới
 const newConfig = ref({
   provider: 'OpenRouter',
   api_key: '',
   model_name: ''
 });
 
-// Danh sách nhà cung cấp
 const providers = ref([
   { name: 'OpenRouter', code: 'OpenRouter' },
   { name: 'Groq', code: 'Groq' },
@@ -54,7 +50,6 @@ const providerFilterOptions = computed(() => {
   return [{ name: 'Tất cả nhà cung cấp', code: 'All' }, ...providers.value];
 });
 
-// Chạy khi mở trang
 onMounted(async () => {
   if (authStore.isLoggedIn) {
     await fetchConfigs();
@@ -72,7 +67,6 @@ const fetchConfigs = async () => {
   }
 }
 
-// Logic tìm kiếm Fuzzy Match kiểu VS Code
 const getFuzzyMatch = (text, query) => {
   if (!query) return { matched: true, matches: [] };
   const lowerText = text.toLowerCase();
@@ -91,20 +85,13 @@ const getFuzzyMatch = (text, query) => {
   return { matched: queryIdx === query.length, matches };
 };
 
-// Dữ liệu sau khi lọc và tìm kiếm
 const filteredConfigs = computed(() => {
   return apiConfigs.value.filter(config => {
-    // Lọc theo Provider
     const matchProvider = filterProvider.value === 'All' || config.provider === filterProvider.value;
-    
-    // Lọc theo Status
     const matchStatus = filterStatus.value === 'All' || 
                        (filterStatus.value === 'Active' && config.is_active) || 
                        (filterStatus.value === 'Inactive' && !config.is_active);
-    
-    // Tìm kiếm Fuzzy
     const fuzzy = getFuzzyMatch(config.model_name, searchQuery.value);
-    
     return matchProvider && matchStatus && fuzzy.matched;
   });
 });
@@ -187,7 +174,7 @@ const toggleActive = async (config) => {
           <span>Bạn cần <a @click="router.push('/login')">đăng nhập</a> để lưu và quản lý cấu hình.</span>
         </div>
 
-        <!-- Form thêm mới -->
+        <!-- Sử dụng BIẾN CUSTOM -->
         <div class="add-form-container">
           <div class="form-grid">
             <div class="field">
@@ -214,7 +201,6 @@ const toggleActive = async (config) => {
           </div>
         </div>
 
-        <!-- Thanh công cụ: Bộ lọc & Search -->
         <div class="toolbar-container">
           <div class="filter-group">
             <Select v-model="filterProvider" :options="providerFilterOptions" optionLabel="name" optionValue="code" placeholder="Lọc Nhà cung cấp" class="filter-select" />
@@ -279,7 +265,6 @@ const toggleActive = async (config) => {
 .settings-wrapper { width: 100%; max-width: 900px; margin: 0 auto; padding-bottom: 2rem; }
 .back-nav { margin-bottom: 1rem; }
 .settings-card { box-shadow: 0 4px 20px rgba(0, 212, 255, 0.08); border: 1px solid var(--p-surface-200); border-radius: 16px; }
-:global(.app-dark) .settings-card { border: 1px solid var(--p-surface-800); }
 .header-title { display: flex; align-items: center; gap: 0.75rem; }
 .header-title h2 { margin: 0; color: var(--p-primary-color); }
 .subtitle { color: var(--p-text-color-secondary); font-size: 0.9rem; margin-top: 0.5rem; }
@@ -287,31 +272,27 @@ const toggleActive = async (config) => {
 .login-notice { display: flex; align-items: center; gap: 0.5rem; background: var(--p-yellow-50); border: 1px solid var(--p-yellow-200); border-radius: 8px; padding: 0.75rem 1rem; margin-bottom: 1.5rem; font-size: 0.9rem; color: var(--p-yellow-800); }
 .login-notice a { font-weight: bold; cursor: pointer; text-decoration: underline; }
 
+/* Sử dụng BIẾN CUSTOM */
 .add-form-container { 
-  background: var(--p-surface-50);
+  background: var(--custom-bg); 
   padding: 1.5rem; 
   border-radius: 8px; 
   margin-bottom: 1.5rem; 
-  border: 1px dashed var(--p-surface-300); 
-}
-:global(.app-dark) .add-form-container {
-  background-color: var(--p-surface-900);
-  border-color: var(--p-surface-700);
+  border: 1px dashed var(--custom-border); 
 }
 
 .form-grid { display: grid; grid-template-columns: 1fr 2fr 2fr auto; gap: 1rem; align-items: end; }
 .field { display: flex; flex-direction: column; gap: 0.5rem; }
-.field label { font-weight: bold; font-size: 0.85rem; }
+.field label { font-weight: bold; font-size: 0.85rem; color: var(--custom-text); }
 
 /* Toolbar styles */
-.toolbar-container { display: flex; justify-content: space-between; align-items: center; gap: 1rem; margin-bottom: 1rem; padding: 0.5rem 0; border-top: 1px solid var(--p-surface-100); padding-top: 1.5rem; }
-:global(.app-dark) .toolbar-container { border-color: var(--p-surface-800); }
+.toolbar-container { display: flex; justify-content: space-between; align-items: center; gap: 1rem; margin-bottom: 1rem; padding: 0.5rem 0; border-top: 1px solid var(--custom-border); padding-top: 1.5rem; }
 .filter-group { display: flex; gap: 10px; }
 .filter-select { min-width: 180px; }
 .search-field { flex: 1; max-width: 400px; }
 
 /* Highlight styles */
-.model-name-display { font-family: monospace; font-size: 0.95rem; }
+.model-name-display { font-family: monospace; font-size: 0.95rem; color: var(--custom-text); }
 .highlight { background-color: #a5f3fc; color: #000; border-radius: 2px; padding: 0 1px; }
 :global(.app-dark) .highlight { background-color: #0e7490; color: #fff; }
 
