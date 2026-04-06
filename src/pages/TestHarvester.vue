@@ -25,14 +25,28 @@ const seedRule = ref('Sinh ra 1 mẫu JSON chào hỏi đơn giản để xác n
 // Trạng thái Test
 const isTesting = ref(false);
 const testResult = ref('');
-const testStatus = ref('idle'); // 'idle' | 'success' | 'error'
+const testStatus = ref('idle');
 
 onMounted(async () => {
-  // Ở đây nếu muốn chỉn chu, bạn có thể gọi API lấy thông tin cái configId này
-  // để hiển thị tên Model lên Header cho đẹp. Tạm thời ta cứ mock giao diện trước.
   currentConfig.value = { id: configId, name: `Config #${configId}` };
 });
+const extractData = (res) => {
+  if (res === null || res === undefined) return null;
+  if (typeof res === 'string') {
+      try { res = JSON.parse(res); } catch { return res; }
+    }
+  if (Array.isArray(res)) return res;
 
+  if (res?.data !== undefined) {
+    if (Array.isArray(res.data)) return res.data;
+    if (res.data?.data !== undefined) return res.data.data;
+    return res.data;
+  }
+
+  if (typeof res === 'object') return res;
+
+  return null;
+};
 const runTest = async () => {
   if (!seedRule.value.trim()) {
     toast.add({ severity: 'warn', summary: 'Cảnh báo', detail: 'Vui lòng nhập quy tắc (Rule) để test!', life: 3000 });
@@ -54,17 +68,16 @@ const runTest = async () => {
   };
 
   try {
-    // API Route này chúng ta sẽ viết ở Backend sau
     const response = await api.post(`/api/configs/${configId}/test`, payload);
 
     testStatus.value = 'success';
-    // Format JSON đẹp mắt để in ra màn hình
-    testResult.value = JSON.stringify(response.data, null, 2);
+    const result = extractData(response);
+    testResult.value = JSON.stringify(result, null, 2);
+
     toast.add({ severity: 'success', summary: 'Thành công', detail: 'Model phản hồi tốt!', life: 3000 });
 
   } catch (error) {
     testStatus.value = 'error';
-    // Bắt và in ra lỗi chi tiết từ Backend (Rate Limit, Auth Error, v.v...)
     const errorDetail = error.response?.data?.detail || error.message || 'Lỗi không xác định';
     testResult.value = `[THẤT BẠI] - Không thể lấy dữ liệu.\n\nNguyên nhân:\n${JSON.stringify(errorDetail, null, 2)}`;
     toast.add({ severity: 'error', summary: 'Lỗi API', detail: 'Vui lòng xem chi tiết trên màn hình', life: 5000 });

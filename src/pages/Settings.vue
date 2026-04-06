@@ -19,7 +19,7 @@ import { api } from '@/api/client';
 const { t } = useI18n()
 const router = useRouter();
 const authStore = useAuthStore()
-const toast     = useToast()
+const toast = useToast()
 const apiConfigs = ref([]);
 const loading = ref(false)
 
