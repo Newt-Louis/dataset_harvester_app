@@ -231,7 +231,7 @@ const parseLogs = (logString) => {
                 <p><strong>Nguồn cấp:</strong> {{ job.current_provider || '---' }} / {{ job.current_model || '---' }}</p>
                 <p><strong>Định dạng yêu cầu:</strong> {{ job.output_format?.toUpperCase() }}</p>
                 <p><strong>Tiến độ mẫu:</strong> {{ job.samples_generated }} / {{ job.total_seeds * job.target_samples_per_seed }} mẫu dữ liệu</p>
-                <p><strong>Vị trí hạt giống:</strong> {{ job.current_seed_index + 1 }} / {{ job.total_seeds }}</p>
+                <p><strong>Vị trí hạt giống:</strong> {{ job.current_seed_index }} / {{ job.total_seeds }}</p>
                 <p><strong>Ngữ cảnh hạt giống:</strong> {{ job.current_seed_context || '---' }}</p>
                 <p><strong>Quy tắc hạt giống:</strong> {{ job.current_seed_rule || '---' }}</p>
               </div>
