@@ -37,7 +37,10 @@ const providers = ref([
   { name: 'OpenRouter', code: 'OpenRouter' },
   { name: 'Groq', code: 'Groq' },
   { name: 'Gemini', code: 'Gemini' },
-  { name: 'Cohere', code: 'Cohere' }
+  { name: 'Cohere', code: 'Cohere' },
+  { name: 'SambaNova', code: 'SambaNova' },
+  { name: 'NVIDIA NIM', code: 'NVIDIA_NIM' },
+  { name: 'Mistral', code: 'Mistral' }
 ]);
 
 const statusOptions = ref([
