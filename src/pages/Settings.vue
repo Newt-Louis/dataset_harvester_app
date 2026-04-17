@@ -40,7 +40,11 @@ const providers = ref([
   { name: 'Cohere', code: 'Cohere' },
   { name: 'SambaNova', code: 'SambaNova' },
   { name: 'NVIDIA NIM', code: 'NVIDIA_NIM' },
-  { name: 'Mistral', code: 'Mistral' }
+  { name: 'Mistral', code: 'Codestral' },
+  { name: 'ZAI', code: 'ZAI' },
+  { name: 'AI/ML', code: 'AIML' },
+  { name: 'Cerebras', code: 'Cerebras' },
+  { name: 'Xiaomi Mimo', code: 'Xiaomi_Mimo' },
 ]);
 
 const statusOptions = ref([
