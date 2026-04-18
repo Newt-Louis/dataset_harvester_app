@@ -45,6 +45,7 @@ const providers = ref([
   { name: 'AI/ML', code: 'AIML' },
   { name: 'Cerebras', code: 'Cerebras' },
   { name: 'Xiaomi Mimo', code: 'Xiaomi_Mimo' },
+  { name: 'OpenAi', code: 'OpenAi' },
 ]);
 
 const statusOptions = ref([

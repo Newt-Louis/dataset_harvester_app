@@ -68,7 +68,34 @@ const formatOptions = [
   { label: 'JSONL (.jsonl)', value: 'jsonl' },
   { label: 'CSV (.csv)', value: 'csv' }
 ];
-const outputSchema = ref('{\n  "data": [\n    {\n      "system": "string",\n      "user": "string",\n      "reasoning": "string",\n      "sql": "string"\n    }\n  ]\n}');
+
+const outputSchema = ref('{\\n  "system": "string",\\n  "user": "string",\\n  "reasoning": "string",\\n  "sql": "string"\\n}');
+const schemaError = ref(false);
+const SUPPORTED_TYPES = ['string', 'number', 'integer', 'float', 'boolean', 'date', 'datetime', 'array', 'object', 'null'];
+const validateSchema = () => {
+  try {
+    const parsed = JSON.parse(outputSchema.value);
+    if (typeof parsed !== 'object' || Array.isArray(parsed) || parsed === null) {
+      throw new Error('Schema phải là một JSON Object phẳng. Ví dụ: {"tên_cột": "string", "tuổi": "number"}');
+    }
+    const keys = Object.keys(parsed);
+    if (keys.length === 0) {
+      throw new Error('Schema phải có ít nhất 1 cặp "key": "kiểu dữ liệu".');
+    }
+    for (const key of keys) {
+      const val = String(parsed[key]).toLowerCase();
+      if (!SUPPORTED_TYPES.includes(val)) {
+        throw new Error(`Giá trị "${parsed[key]}" của key "${key}" không hợp lệ.\nKiểu được hỗ trợ: ${SUPPORTED_TYPES.join(', ')}.`);
+      }
+    }
+    schemaError.value = false;
+    return true;
+  } catch (e) {
+    schemaError.value = true;
+    toast.add({ severity: 'error', summary: 'Schema không hợp lệ', detail: e.message, life: 5000 });
+    return false;
+  }
+};
 
 const seeds = ref([
   {
@@ -118,6 +145,7 @@ const startHarvesting = async () => {
     return;
   }
 
+  if (!validateSchema()) return;
   isGenerating.value = true;
   
   const payload = {
@@ -211,7 +239,8 @@ const startHarvesting = async () => {
               <label for="schema">Cấu trúc JSON đầu ra</label>
               <SelectButton v-model="outputFormat" :options="formatOptions" optionLabel="label" optionValue="value" :allowEmpty="false" class="format-selector" :disabled="isGenerating" />
             </div>
-            <Textarea id="schema" v-model="outputSchema" rows="6" class="w-full code-font" :disabled="isGenerating" />
+            <Textarea id="schema" v-model="outputSchema" rows="6" class="w-full code-font" :class="{ 'schema-error': schemaError }" :disabled="isGenerating" />
+            <small class="schema-hint">Chỉ nhập 1 object phẳng. VD: <code>{"tên": "string", "điểm": "number"}</code></small>
           </div>
           <div class="field slider-field mt-4">
             <label>Số lượng mẫu (Samples) / Mỗi Hạt giống:</label>
@@ -324,6 +353,16 @@ const startHarvesting = async () => {
   background-color: var(--custom-bg); 
   color: var(--custom-text);
   border: 1px solid var(--custom-border);
+}
+
+:deep(.schema-error.p-textarea) {
+  border-color: var(--p-red-500) !important;
+  box-shadow: 0 0 0 1px var(--p-red-500);
+}
+.schema-hint {
+  color: var(--p-text-color-secondary);
+  font-size: 0.8rem;
+  margin-top: -0.3rem;
 }
 
 .slider-container { display: flex; align-items: center; gap: 1.5rem; margin-top: 0.5rem; width: 100%; }

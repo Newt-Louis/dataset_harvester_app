@@ -18,7 +18,35 @@ const currentConfig = ref(null);
 // Form dữ liệu Test (Mock 1 phần nhỏ của Harvester)
 const rolePrompt = ref('Bạn là một AI Data Engineer cấp Senior. Hãy trả về kết quả định dạng JSON.');
 const constraintsPrompt = ref('Tuyệt đối không giải thích dài dòng. Chỉ trả về JSON thuần túy.');
-const outputSchema = ref('{\n  "data": [\n    {\n      "test_msg": "string",\n      "status": "string"\n    }\n  ]\n}');
+const outputSchema = ref('{\n  "test_msg": "string",\n  "status": "string"\n}');
+
+const schemaError = ref(false);
+const SUPPORTED_TYPES = ['string', 'number', 'integer', 'float', 'boolean', 'date', 'datetime', 'array', 'object', 'null'];
+
+const validateSchema = () => {
+  try {
+    const parsed = JSON.parse(outputSchema.value);
+    if (typeof parsed !== 'object' || Array.isArray(parsed) || parsed === null) {
+      throw new Error('Schema phải là một JSON Object phẳng. Ví dụ: {"tên_cột": "string", "tuổi": "number"}');
+    }
+    const keys = Object.keys(parsed);
+    if (keys.length === 0) {
+      throw new Error('Schema phải có ít nhất 1 cặp "key": "kiểu dữ liệu".');
+    }
+    for (const key of keys) {
+      const val = String(parsed[key]).toLowerCase();
+      if (!SUPPORTED_TYPES.includes(val)) {
+        throw new Error(`Giá trị "${parsed[key]}" của key "${key}" không hợp lệ.\nKiểu được hỗ trợ: ${SUPPORTED_TYPES.join(', ')}.`);
+      }
+    }
+    schemaError.value = false;
+    return true;
+  } catch (e) {
+    schemaError.value = true;
+    toast.add({ severity: 'error', summary: 'Schema không hợp lệ', detail: e.message, life: 5000 });
+    return false;
+  }
+};
 const seedContext = ref('Sử dụng bối cảnh: Hệ thống đang được test kết nối API.');
 const seedRule = ref('Sinh ra 1 mẫu JSON chào hỏi đơn giản để xác nhận model hoạt động tốt.');
 
@@ -52,6 +80,8 @@ const runTest = async () => {
     toast.add({ severity: 'warn', summary: 'Cảnh báo', detail: 'Vui lòng nhập quy tắc (Rule) để test!', life: 3000 });
     return;
   }
+
+  if (!validateSchema()) return;
 
   isTesting.value = true;
   testStatus.value = 'idle';
@@ -120,7 +150,8 @@ const runTest = async () => {
 
             <div class="field">
               <label>Schema JSON Mong muốn</label>
-              <Textarea v-model="outputSchema" rows="4" class="w-full code-font" :disabled="isTesting" />
+              <Textarea v-model="outputSchema" rows="4" class="w-full code-font" :class="{ 'schema-error': schemaError }" :disabled="isTesting" />
+              <small class="schema-hint">Chỉ nhập 1 object phẳng. VD: <code>{"tên": "string", "điểm": "number"}</code></small>
             </div>
 
             <div class="seed-block">
@@ -219,6 +250,17 @@ const runTest = async () => {
   background-color: var(--p-surface-100);
 }
 :global(.app-dark) .code-font { background-color: var(--p-surface-950); }
+
+:deep(.schema-error.p-textarea) {
+  border-color: var(--p-red-500) !important;
+  box-shadow: 0 0 0 1px var(--p-red-500);
+}
+
+.schema-hint {
+  color: var(--p-text-color-secondary);
+  font-size: 0.8rem;
+  margin-top: -0.3rem;
+}
 
 .seed-block {
   background: var(--p-surface-50);
